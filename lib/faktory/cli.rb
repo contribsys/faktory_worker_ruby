@@ -1,0 +1,329 @@
+# encoding: utf-8
+# frozen_string_literal: true
+$stdout.sync = true
+
+require 'yaml'
+require 'singleton'
+require 'optparse'
+require 'erb'
+require 'fileutils'
+
+require 'faktory'
+require 'faktory/util'
+
+module Faktory
+  class CLI
+    include Util
+    include Singleton unless $TESTING
+
+    PROCTITLES = [
+      proc { 'faktory'.freeze },
+      proc { Faktory::VERSION },
+      proc { |me, data| data['tag'] },
+      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
+      proc { |me, data| "stopping" if me.stopping? },
+    ]
+
+    # Used for CLI testing
+    attr_accessor :code
+    attr_accessor :launcher
+    attr_accessor :environment
+
+    def initialize
+      @code = nil
+    end
+
+    def parse(args=ARGV)
+      @code = nil
+
+      setup_options(args)
+      initialize_logger
+      validate!
+    end
+
+    def jruby?
+      defined?(::JRUBY_VERSION)
+    end
+
+    # Code within this method is not tested because it alters
+    # global process state irreversibly.  PRs which improve the
+    # test coverage of Faktory::CLI are welcomed.
+    def run
+      boot_system
+      print_banner
+
+      self_read, self_write = IO.pipe
+      sigs = %w(INT TERM TTIN TSTP)
+
+      sigs.each do |sig|
+        begin
+          trap sig do
+            self_write.puts(sig)
+          end
+        rescue ArgumentError
+          puts "Signal #{sig} not supported"
+        end
+      end
+
+      logger.info "Running in #{RUBY_DESCRIPTION}"
+      logger.info Faktory::LICENSE
+      logger.info "Upgrade to Faktory Pro for more features and support: http://faktory.org" unless defined?(::Faktory::Pro)
+
+      # cache process identity
+      Faktory.options[:identity] = identity
+
+      # Touch middleware so it isn't lazy loaded by multiple threads, #3043
+      Faktory.server_middleware
+
+      # Before this point, the process is initializing with just the main thread.
+      # Starting here the process will now have multiple threads running.
+      fire_event(:startup)
+
+      logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Server Middleware: #{Faktory.exec_middleware.map(&:klass).join(', ')}" }
+
+      logger.info 'Starting processing, hit Ctrl-C to stop' if $stdout.tty?
+
+      require 'faktory/launcher'
+      @launcher = Faktory::Launcher.new(options)
+
+      begin
+        launcher.run
+
+        while readable_io = IO.select([self_read])
+          signal = readable_io.first[0].gets.strip
+          handle_signal(signal)
+        end
+      rescue Interrupt
+        logger.info 'Shutting down'
+        launcher.stop
+        # Explicitly exit so busy Processor threads can't block
+        # process shutdown.
+        logger.info "Bye!"
+        exit(0)
+      end
+    end
+
+    def self.banner
+%q{
+         m,
+         `$b
+    .ss,  $$:         .,d$
+    `$$P,d$P'    .,md$P"'
+     ,$$$$$bmmd$$$P^'
+   .d$$$$$$$$$$P'
+   $$^' `"^$$$'       ____  _     _      _    _
+   $:     ,$$:       / ___|(_) __| | ___| | _(_) __ _
+   `b     :$$        \___ \| |/ _` |/ _ \ |/ / |/ _` |
+          $$:         ___) | | (_| |  __/   <| | (_| |
+          $$         |____/|_|\__,_|\___|_|\_\_|\__, |
+        .d$$                                       |_|
+}
+    end
+
+    def handle_signal(sig)
+      Faktory.logger.debug "Got #{sig} signal"
+      case sig
+      when 'INT'
+        # Handle Ctrl-C in JRuby like MRI
+        # http://jira.codehaus.org/browse/JRUBY-4637
+        raise Interrupt
+      when 'TERM'
+        # Heroku sends TERM and then waits 10 seconds for process to exit.
+        raise Interrupt
+      when 'TSTP'
+        Faktory.logger.info "Received TSTP, no longer accepting new work"
+        launcher.quiet
+      when 'TTIN'
+        Thread.list.each do |thread|
+          Faktory.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['faktory_label']}"
+          if thread.backtrace
+            Faktory.logger.warn thread.backtrace.join("\n")
+          else
+            Faktory.logger.warn "<no backtrace available>"
+          end
+        end
+      end
+    end
+
+    private
+
+    def print_banner
+      # Print logo and banner for development
+      if environment == 'development' && $stdout.tty?
+        puts "\e[#{31}m"
+        puts Faktory::CLI.banner
+        puts "\e[0m"
+      end
+    end
+
+    def set_environment(cli_env)
+      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+    end
+
+    alias_method :die, :exit
+    alias_method :☠, :exit
+
+    def setup_options(args)
+      opts = parse_options(args)
+      set_environment opts[:environment]
+
+      cfile = opts[:config_file]
+      opts = parse_config(cfile).merge(opts) if cfile
+
+      opts[:strict] = true if opts[:strict].nil?
+      opts[:concurrency] = Integer(ENV["RAILS_MAX_THREADS"]) if !opts[:concurrency] && ENV["RAILS_MAX_THREADS"]
+
+      options.merge!(opts)
+    end
+
+    def options
+      Faktory.options
+    end
+
+    def boot_system
+      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
+
+      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
+
+      if File.directory?(options[:require])
+        require 'rails'
+        if ::Rails::VERSION::MAJOR == 4
+          # Painful contortions, see 1791 for discussion
+          # No autoloading, we want to force eager load for everything.
+          require File.expand_path("#{options[:require]}/config/application.rb")
+          ::Rails::Application.initializer "faktory.eager_load" do
+            ::Rails.application.config.eager_load = true
+          end
+          require 'faktory/rails'
+          require File.expand_path("#{options[:require]}/config/environment.rb")
+        else
+          require 'faktory/rails'
+          require File.expand_path("#{options[:require]}/config/environment.rb")
+        end
+        options[:tag] ||= default_tag
+      else
+        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
+            "./#{options[:require]} or /path/to/#{options[:require]}"
+
+        require(options[:require]) || raise(ArgumentError, not_required_message)
+      end
+    end
+
+    def default_tag
+      dir = ::Rails.root
+      name = File.basename(dir)
+      if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
+        if File.basename(prevdir) == 'releases'
+          return File.basename(File.dirname(prevdir))
+        end
+      end
+      name
+    end
+
+    def validate!
+      options[:queues] << 'default' if options[:queues].empty?
+
+      if !File.exist?(options[:require]) ||
+         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
+        logger.info "=================================================================="
+        logger.info "  Please point Faktory to a Rails 4/5 application or a Ruby file  "
+        logger.info "  to load your worker classes with -r [DIR|FILE]."
+        logger.info "=================================================================="
+        logger.info @parser
+        die(1)
+      end
+
+      [:concurrency, :timeout].each do |opt|
+        raise ArgumentError, "#{opt}: #{options[opt]} is not a valid value" if options.has_key?(opt) && options[opt].to_i <= 0
+      end
+    end
+
+    def parse_options(argv)
+      opts = {}
+
+      @parser = OptionParser.new do |o|
+        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
+          opts[:concurrency] = Integer(arg)
+        end
+
+        o.on '-e', '--environment ENV', "Application environment" do |arg|
+          opts[:environment] = arg
+        end
+
+        o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
+          opts[:tag] = arg
+        end
+
+        o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
+          queue, weight = arg.split(",")
+          parse_queue opts, queue, weight
+        end
+
+        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+          opts[:require] = arg
+        end
+
+        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
+          opts[:timeout] = Integer(arg)
+        end
+
+        o.on "-v", "--verbose", "Print more verbose output" do |arg|
+          opts[:verbose] = arg
+        end
+
+        o.on '-C', '--config PATH', "path to YAML config file" do |arg|
+          opts[:config_file] = arg
+        end
+
+        o.on '-V', '--version', "Print version and exit" do |arg|
+          puts "Faktory #{Faktory::VERSION}"
+          die(0)
+        end
+      end
+
+      @parser.banner = "faktory [options]"
+      @parser.on_tail "-h", "--help", "Show help" do
+        logger.info @parser
+        die 1
+      end
+      @parser.parse!(argv)
+
+      %w[config/faktory.yml config/faktory.yml.erb].each do |filename|
+        opts[:config_file] ||= filename if File.exist?(filename)
+      end
+
+      opts
+    end
+
+    def initialize_logger
+      Faktory::Logging.initialize_logger(options[:logfile]) if options[:logfile]
+
+      Faktory.logger.level = ::Logger::DEBUG if options[:verbose]
+    end
+
+    def parse_config(cfile)
+      opts = {}
+      if File.exist?(cfile)
+        opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
+        opts = opts.merge(opts.delete(environment) || {})
+        parse_queues(opts, opts.delete(:queues) || [])
+      else
+        # allow a non-existent config file so Faktory
+        # can be deployed by cap with just the defaults.
+      end
+      opts
+    end
+
+    def parse_queues(opts, queues_and_weights)
+      queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
+    end
+
+    def parse_queue(opts, q, weight=nil)
+      [weight.to_i, 1].max.times do
+       (opts[:queues] ||= []) << q
+      end
+      opts[:strict] = false if weight.to_i > 0
+    end
+  end
+end
