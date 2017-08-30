@@ -96,7 +96,6 @@ module Faktory
       #      or *Integer* count
       #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
       #      can be true, false or an integer number of lines to save, default *false*
-      #   pool - use the given Redis connection pool to push this type of job to a given shard.
       #
       # In practice, any option is allowed.  This is the main mechanism to configure the
       # options for a specific job.

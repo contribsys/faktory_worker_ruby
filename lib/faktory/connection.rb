@@ -28,13 +28,6 @@ module Faktory
       private
 
       # Faktory needs a lot of concurrent connections.
-      #
-      # We need a connection for each Processor.
-      # We need a connection for Pro's real-time change listener
-      # We need a connection to various features to call Redis every few seconds:
-      #   - the process heartbeat.
-      #   - enterprise's leader election
-      #   - enterprise's cron support
       def verify_sizing(size, concurrency)
         raise ArgumentError, "Your connection pool is too small for Faktory to work. Your pool has #{size} connections but really needs to have at least #{concurrency + 2}" if size <= concurrency
       end
@@ -61,9 +54,9 @@ module Faktory
         raise "Invalid FAKTORY_PROVIDER value, should not be a URL" if ENV['FAKTORY_PROVIDER'] =~ /:/
 
         # If you have this in your environment:
-        # MY_REDIS_URL=redis://hostname.example.com:1238/4
+        # MY_FAKTORY_URL=tcp://hostname.example.com:1238/4
         # then set:
-        # REDIS_PROVIDER=MY_REDIS_URL
+        # FAKTORY_PROVIDER=MY_FAKTORY_URL
         # and Faktory will find your custom URL variable with no custom
         # initialization code at all.
         ENV[

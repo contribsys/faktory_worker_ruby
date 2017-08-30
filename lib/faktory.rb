@@ -76,11 +76,11 @@ module Faktory
   end
 
   def self.faktory_pool
-    @redis ||= Faktory::Connection.create
+    @pool ||= Faktory::Connection.create
   end
 
   def self.faktory=(hash)
-    @redis = if hash.is_a?(ConnectionPool)
+    @pool = if hash.is_a?(ConnectionPool)
       hash
     else
       Faktory::Connection.create(hash)
