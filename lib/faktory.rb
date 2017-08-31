@@ -121,6 +121,15 @@ module Faktory
     Faktory::Logging.logger = log
   end
 
+  def self.💃🕺(io = $stdout)
+    colors = (31..37).to_a
+    sz = colors.size
+    "DANCE MODE ACTIVATED".chars.each_with_index do |chr, idx|
+      io.print("\e[#{colors[rand(sz)]};1m#{chr}")
+    end
+    io.print("\e[0m\n")
+  end
+
   # Register a proc to handle any error which occurs within the Faktory process.
   #
   #   Faktory.configure_worker do |config|
