@@ -38,6 +38,7 @@ module Faktory
       @reloader = Faktory.options[:reloader]
       @logging = (mgr.options[:job_logger] || Faktory::JobLogger).new
       @retrier = Faktory::JobRetry.new
+      @fetcher = Faktory::Fetcher.new(Faktory.options)
     end
 
     def terminate(wait=false)
@@ -83,24 +84,14 @@ module Faktory
       @job = nil
     end
 
-    def get_one
+    def fetch
       begin
-        work = @strategy.retrieve_work
+        work = @fetcher.retrieve_work
         (logger.info { "Faktory is online, #{Time.now - @down} sec downtime" }; @down = nil) if @down
         work
       rescue Faktory::Shutdown
       rescue => ex
         handle_fetch_exception(ex)
-      end
-    end
-
-    def fetch
-      j = get_one
-      if j && @done
-        j.requeue
-        nil
-      else
-        j
       end
     end
 
@@ -116,29 +107,23 @@ module Faktory
       nil
     end
 
-    def dispatch(job_hash, queue)
+    def dispatch(job_hash)
       # since middleware can mutate the job hash
       # we clone here so we report the original
       # job structure to the Web UI
       pristine = cloned(job_hash)
 
       Faktory::Logging.with_job_hash_context(job_hash) do
-        @retrier.global(job_hash, queue) do
-          @logging.call(job_hash, queue) do
-            stats(pristine, queue) do
-              # Rails 5 requires a Reloader to wrap code execution.  In order to
-              # constantize the worker and instantiate an instance, we have to call
-              # the Reloader.  It handles code loading, db connection management, etc.
-              # Effectively this block denotes a "unit of work" to Rails.
-              @reloader.call do
-                klass  = constantize(job_hash['class'.freeze])
-                worker = klass.new
-                worker.jid = job_hash['jid'.freeze]
-                @retrier.local(worker, job_hash, queue) do
-                  yield worker
-                end
-              end
-            end
+        @logging.call(job_hash) do
+          # Rails 5 requires a Reloader to wrap code execution.  In order to
+          # constantize the worker and instantiate an instance, we have to call
+          # the Reloader.  It handles code loading, db connection management, etc.
+          # Effectively this block denotes a "unit of work" to Rails.
+          @reloader.call do
+            klass  = constantize(job_hash['jobtype'.freeze])
+            worker = klass.new
+            worker.jid = job_hash['jid'.freeze]
+            yield worker
           end
         end
       end
@@ -148,47 +133,22 @@ module Faktory
       jobstr = work.job
       queue = work.queue_name
 
-      ack = false
       begin
-        # Treat malformed JSON as a special case: job goes straight to the morgue.
-        job_hash = nil
-        begin
-          job_hash = Faktory.load_json(jobstr)
-        rescue => ex
-          handle_exception(ex, { :context => "Invalid JSON for job", :jobstr => jobstr })
-          send_to_morgue(jobstr)
-          ack = true
-          raise
-        end
-
-        ack = true
-        dispatch(job_hash, queue) do |worker|
-          Faktory.exec_middleware.invoke(worker, job_hash, queue) do
-            execute_job(worker, cloned(job_hash['args'.freeze]))
+        job_hash = JSON.parse(jobstr)
+        dispatch(job_hash) do |worker|
+          Faktory.exec_middleware.invoke(worker, job_hash) do
+            execute_job(worker, job_hash['args'.freeze])
           end
         end
+        work.acknowledge
       rescue Faktory::Shutdown
         # Had to force kill this job because it didn't finish
         # within the timeout.  Don't acknowledge the work since
         # we didn't properly finish it.
-        ack = false
       rescue Exception => ex
-        e = ex.is_a?(::Faktory::JobRetry::Skip) && ex.cause ? ex.cause : ex
-        handle_exception(e, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
-        raise e
-      ensure
-        work.acknowledge if ack
-      end
-    end
-
-    def send_to_morgue(msg)
-      now = Time.now.to_f
-      Faktory.redis do |conn|
-        conn.multi do
-          conn.zadd('dead', now, msg)
-          conn.zremrangebyscore('dead', '-inf', now - DeadSet.timeout)
-          conn.zremrangebyrank('dead', 0, -DeadSet.max_jobs)
-        end
+        handle_exception(ex, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
+        work.fail(ex)
+        raise ex
       end
     end
 
@@ -198,17 +158,6 @@ module Faktory
 
     def thread_identity
       @str ||= Thread.current.object_id.to_s(36)
-    end
-
-    def stats(job_hash, queue)
-      yield
-    end
-
-    # Deep clone the arguments passed to the worker so that if
-    # the job fails, what is pushed back onto Redis hasn't
-    # been mutated by the worker.
-    def cloned(thing)
-      Marshal.load(Marshal.dump(thing))
     end
 
     def constantize(str)

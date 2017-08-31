@@ -1,7 +1,7 @@
 module Faktory
   class JobLogger
 
-    def call(item, queue)
+    def call(item)
       start = Time.now
       logger.info("start".freeze)
       yield
