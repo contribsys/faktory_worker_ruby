@@ -16,14 +16,6 @@ module Faktory
     include Util
     include Singleton unless $TESTING
 
-    PROCTITLES = [
-      proc { 'faktory'.freeze },
-      proc { Faktory::VERSION },
-      proc { |me, data| data['tag'] },
-      proc { |me, data| "[#{Processor::WORKER_STATE.size} of #{data['concurrency']} busy]" },
-      proc { |me, data| "stopping" if me.stopping? },
-    ]
-
     # Used for CLI testing
     attr_accessor :code
     attr_accessor :launcher
@@ -73,14 +65,14 @@ module Faktory
       Faktory.options[:identity] = identity
 
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
-      Faktory.server_middleware
+      Faktory.exec_middleware
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
       fire_event(:startup)
 
       logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(', ')}" }
-      logger.debug { "Server Middleware: #{Faktory.exec_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Execute Middleware: #{Faktory.exec_middleware.map(&:klass).join(', ')}" }
 
       logger.info 'Starting processing, hit Ctrl-C to stop' if $stdout.tty?
 
@@ -106,18 +98,7 @@ module Faktory
 
     def self.banner
 %q{
-         m,
-         `$b
-    .ss,  $$:         .,d$
-    `$$P,d$P'    .,md$P"'
-     ,$$$$$bmmd$$$P^'
-   .d$$$$$$$$$$P'
-   $$^' `"^$$$'       ____  _     _      _    _
-   $:     ,$$:       / ___|(_) __| | ___| | _(_) __ _
-   `b     :$$        \___ \| |/ _` |/ _ \ |/ / |/ _` |
-          $$:         ___) | | (_| |  __/   <| | (_| |
-          $$         |____/|_|\__,_|\___|_|\_\_|\__, |
-        .d$$                                       |_|
+    INSERT SWEET FAKTORY BANNER HERE
 }
     end
 

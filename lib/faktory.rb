@@ -29,8 +29,8 @@ module Faktory
     reloader: proc { |&block| block.call },
   }
 
-  DEFAULT_WORKER_OPTIONS = {
-    'retry' => true,
+  DEFAULT_JOB_OPTIONS = {
+    'retry' => 25,
     'queue' => 'default'
   }
 
@@ -93,18 +93,18 @@ module Faktory
     @client_chain
   end
 
-  def self.worker_middleware
-    @server_chain ||= Middleware::Chain.new
-    yield @server_chain if block_given?
-    @server_chain
+  def self.exec_middleware
+    @exec_chain ||= Middleware::Chain.new
+    yield @exec_chain if block_given?
+    @exec_chain
   end
 
-  def self.default_worker_options=(hash)
+  def self.default_job_options=(hash)
     # stringify
-    @default_worker_options = default_worker_options.merge(Hash[hash.map{|k, v| [k.to_s, v]}])
+    @default_job_options = default_job_options.merge(Hash[hash.map{|k, v| [k.to_s, v]}])
   end
-  def self.default_worker_options
-    defined?(@default_worker_options) ? @default_worker_options : DEFAULT_WORKER_OPTIONS
+  def self.default_job_options
+    defined?(@default_job_options) ? @default_job_options : DEFAULT_JOB_OPTIONS
   end
 
   def self.load_json(string)

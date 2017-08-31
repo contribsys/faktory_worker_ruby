@@ -2,7 +2,7 @@
 module Faktory
 
   ##
-  # Include this module in your worker class and you can easily create
+  # Include this module in your Job class and you can easily create
   # asynchronous jobs:
   #
   # class HardJob
@@ -15,7 +15,7 @@ module Faktory
   #
   # Then in your Rails app, you can do this:
   #
-  #   HardWorker.perform_later(1, 2, 3)
+  #   HardJob.perform_later(1, 2, 3)
   #
   # Note that perform_later is a class method, perform is an instance method.
   module Job
@@ -35,7 +35,7 @@ module Faktory
 
     # This helper class encapsulates the set options for `set`, e.g.
     #
-    #     SomeWorker.set(queue: 'foo').perform_async(....)
+    #     SomeJob.set(queue: 'foo').perform_async(....)
     #
     class Setter
       def initialize(opts)
@@ -88,32 +88,21 @@ module Faktory
       alias_method :perform_at, :perform_in
 
       ##
-      # Allows customization for this type of Worker.
+      # Allows customization of Faktory features for this type of Job.
       # Legal options:
       #
-      #   queue - use a named queue for this Worker, default 'default'
-      #   retry - enable the RetryJobs middleware for this Worker, *true* to use the default
-      #      or *Integer* count
-      #   backtrace - whether to save any error backtrace in the retry payload to display in web UI,
-      #      can be true, false or an integer number of lines to save, default *false*
+      #   queue - use a named queue for this Job, default 'default'
+      #   retry - enable automatic retry for this Job, *Integer* count, default 25
+      #   backtrace - whether to save the error backtrace in the job payload to display in web UI,
+      #      an integer number of lines to save, default *0*
       #
-      # In practice, any option is allowed.  This is the main mechanism to configure the
-      # options for a specific job.
       def faktory_options(opts={})
         # stringify
         self.faktory_options_hash = get_faktory_options.merge(Hash[opts.map{|k, v| [k.to_s, v]}])
       end
 
-      def faktory_retry_in(&block)
-        self.faktory_retry_in_block = block
-      end
-
-      def faktory_retries_exhausted(&block)
-        self.faktory_retries_exhausted_block = block
-      end
-
       def get_faktory_options # :nodoc:
-        self.faktory_options_hash ||= faktory.default_worker_options
+        self.faktory_options_hash ||= Faktory.default_job_options
       end
 
       def client_push(item) # :nodoc:

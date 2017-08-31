@@ -11,8 +11,6 @@ module Faktory
           options[key.to_sym] = options.delete(key)
         end
 
-        options[:url] ||= determine_provider
-
         size = options[:size] || (Faktory.worker? ? (Faktory.options[:concurrency] + 5) : 5)
 
         verify_sizing(size, Faktory.options[:concurrency]) if Faktory.worker?
@@ -21,7 +19,7 @@ module Faktory
         log_info(options)
 
         ConnectionPool.new(:timeout => pool_timeout, :size => size) do
-          Faktory::Client.new(options)
+          Faktory::Client.new
         end
       end
 
@@ -43,8 +41,8 @@ module Faktory
         if scrubbed_options[:password]
           scrubbed_options[:password] = redacted
         end
-        if Faktory.exec?
-          Faktory.logger.info("Booting Faktory executor #{Faktory::VERSION} with options #{scrubbed_options}")
+        if Faktory.worker?
+          Faktory.logger.info("Booting Faktory worker #{Faktory::VERSION} with options #{scrubbed_options}")
         else
           Faktory.logger.debug("#{Faktory::NAME} client with options #{scrubbed_options}")
         end

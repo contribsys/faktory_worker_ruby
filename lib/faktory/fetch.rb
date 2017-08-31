@@ -18,7 +18,7 @@ module Faktory
     end
 
     def retrieve_work
-      work = Faktory.server { |conn| conn.pop(*queues) }
+      work = Faktory.server { |conn| conn.pop(*queues_cmd) }
       UnitOfWork.new(*work) if work
     end
 

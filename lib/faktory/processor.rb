@@ -2,7 +2,6 @@
 require 'faktory/util'
 require 'faktory/fetch'
 require 'faktory/job_logger'
-require 'faktory/job_retry'
 require 'thread'
 
 module Faktory
@@ -29,6 +28,12 @@ module Faktory
     attr_reader :thread
     attr_reader :job
 
+    @@busy_lock = Mutex.new
+    @@busy_count = 0
+    def self.busy_count
+      @@busy_count
+    end
+
     def initialize(mgr)
       @mgr = mgr
       @down = false
@@ -37,7 +42,6 @@ module Faktory
       @thread = nil
       @reloader = Faktory.options[:reloader]
       @logging = (mgr.options[:job_logger] || Faktory::JobLogger).new
-      @retrier = Faktory::JobRetry.new
       @fetcher = Faktory::Fetcher.new(Faktory.options)
     end
 
@@ -80,7 +84,20 @@ module Faktory
 
     def process_one
       @job = fetch
-      process(@job) if @job
+      if @job
+        @@busy_lock.synchronize do
+          @@busy_counter = @@busy_counter + 1
+        end
+        begin
+          process(@job)
+        ensure
+          @@busy_lock.synchronize do
+            @@busy_counter = @@busy_counter - 1
+          end
+        end
+      else
+        sleep 1
+      end
       @job = nil
     end
 

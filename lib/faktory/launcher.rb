@@ -19,7 +19,7 @@ module Faktory
     end
 
     def run
-      @thread = safe_thread("heartbeat", &method(:start_heartbeat))
+      @thread = safe_thread("heartbeat", &method(:heartbeat))
       @manager.start
     end
 
@@ -44,42 +44,25 @@ module Faktory
       @done
     end
 
+    PROCTITLES = []
+
     private unless $TESTING
 
     def heartbeat
-      results = Faktory::CLI::PROCTITLES.map {|x| x.(self, to_data) }
-      results.compact!
-      $0 = results.join(' ')
-    end
+      title = ['faktory-worker', Faktory::VERSION, @options[:tag]].compact.join(" ")
+      PROCTITLES << proc { title }
+      PROCTITLES << proc { "[#{Processor.busy_count} of #{@options[:concurrency]} busy]" }
+      PROCTITLES << proc { "stopping" if stopping? }
 
-    def start_heartbeat
-      while true
-        heartbeat
-        sleep 5
-      end
-      Faktory.logger.info("Heartbeat stopping...")
-    end
+      loop do
+        $0 = PROCTITLES.map {|p| p.call }.join(" ")
 
-    def to_data
-      @data ||= begin
-        {
-          'hostname' => hostname,
-          'started_at' => Time.now.to_f,
-          'pid' => $$,
-          'tag' => @options[:tag] || '',
-          'concurrency' => @options[:concurrency],
-          'queues' => @options[:queues].uniq,
-          'labels' => @options[:labels],
-          'identity' => identity,
-        }
-      end
-    end
-
-    def to_json
-      @json ||= begin
-        # this data changes infrequently so dump it to a string
-        # now so we don't need to dump it every heartbeat.
-        Faktory.dump_json(to_data)
+        begin
+          Faktory.server {|c| c.beat }
+        rescue => ex
+          # best effort, try again in a few secs
+        end
+        sleep 10
       end
     end
 
