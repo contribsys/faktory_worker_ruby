@@ -123,7 +123,7 @@ module Faktory
           item[key.to_s] = item.delete(key)
         end
 
-        Faktory.server {|c| c.push(item) }
+        pool.with {|c| c.push(item) }
       end
 
       def faktory_class_attribute(*attrs)
