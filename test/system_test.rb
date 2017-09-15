@@ -16,14 +16,14 @@ class SystemTest < Minitest::Test
       threads << Thread.new do
         client = Faktory::Client.new
 
-        puts "Pushing"
+        #puts "Pushing"
         100.times do |idx|
           client.push(randjob((ix*100)+idx))
         end
 
-        puts "Popping"
+        #puts "Popping"
         100.times do |idx|
-          job = client.pop("default")
+          job = client.fetch("default")
           refute_nil job
           if idx % 100 == 99
             client.fail(job["jid"], RuntimeError.new("oops"))
