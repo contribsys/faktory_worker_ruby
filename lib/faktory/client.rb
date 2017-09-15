@@ -40,10 +40,10 @@ module Faktory
       end
     end
 
-    def pop(*queues)
+    def fetch(*queues)
       job = nil
       transaction do
-        command("POP", *queues)
+        command("FETCH", *queues)
         job = result
       end
       JSON.parse(job) if job
@@ -69,7 +69,7 @@ module Faktory
     # worker process is still alive.
     #
     # Return a string signal to process, legal values are "quiet" or "terminate".
-    # The quiet signal is informative: the server won't allow this process to POP
+    # The quiet signal is informative: the server won't allow this process to FETCH
     # any more jobs anyways.
     def beat
       transaction do
@@ -100,7 +100,10 @@ module Faktory
         "pid": $$,
         "labels": ["ruby-#{RUBY_VERSION}"],
       }
-      payload["password"] = @location.password if @location.password
+      if @location.password
+        payload["salt"] = salt = SecureRandom.hex(8)
+        payload["pwdhash"] = Digest::SHA256.hexdigest(@location.password + salt)
+      end
 
       command("AHOY", JSON.dump(payload))
       ok!
