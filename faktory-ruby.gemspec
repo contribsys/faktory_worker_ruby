@@ -17,8 +17,7 @@ Gem::Specification.new do |gem|
   gem.version       = Faktory::VERSION
   gem.required_ruby_version = ">= 2.2.2"
 
-  gem.add_dependency                  'connection_pool', '~> 2.2', '>= 2.2.0'
-  gem.add_development_dependency      'minitest', '~> 5.10', '>= 5.10.1'
-  gem.add_development_dependency      'rake', '~> 10.0'
-  gem.add_development_dependency      'rails', '>= 3.2.0'
+  gem.add_dependency                  'connection_pool'
+  gem.add_development_dependency      'minitest'
+  gem.add_development_dependency      'rake'
 end
