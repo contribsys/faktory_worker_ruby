@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     faktory-ruby (0.5.0)
-      connection_pool
+      connection_pool (~> 2.2, >= 2.2.1)
 
 GEM
   remote: https://rubygems.org/
@@ -16,8 +16,8 @@ PLATFORMS
 
 DEPENDENCIES
   faktory-ruby!
-  minitest
-  rake
+  minitest (~> 5)
+  rake (~> 12)
 
 BUNDLED WITH
    1.15.4
