@@ -32,7 +32,9 @@ server part is [here](https://github.com/contribsys/faktory/#readme)
 
 ## Installation
 
-First, make sure you have the [Faktory server](https://github.com/contribsys/faktory/#installation) installed.  Next, install this gem:
+First, make sure you have the [Faktory server](https://github.com/contribsys/faktory/#installation) installed.
+
+Next, install this gem:
 
     gem install faktory-ruby
 
@@ -50,7 +52,7 @@ class SomeJob
 end
 ```
 
-then just call `SomeJob.perform_later(...)` to create a job.
+then just call `SomeJob.perform_async(...)` to create a job.
 
 Arguments to the perform method must be simple types supported
 by JSON, exactly like Sidekiq.
@@ -58,7 +60,7 @@ by JSON, exactly like Sidekiq.
 ## Start the worker
 
 Once you've created a job, you need to start a Worker process to execute
-it.
+those jobs.
 
 ```ruby
 bundle exec faktory-worker
@@ -78,13 +80,11 @@ within the server itself; the worker process can be dumb and rely on
 the server for job retries, reservation, Web UI, etc.  This also means
 we can create workers in any programming language.
 
+If your organization is 100% Ruby, Sidekiq will serve you well.  If your
+organization is polyglot, Faktory will be a better fit.
+
 Faktory-ruby tries to be Sidekiq API compatible where possible (and
 PRs to improve this are very welcome).
-
-## Commercial Support
-
-TBD, based on demand.  Want to see Sidekiq Pro / Enterprise features
-in a commercial version of Faktory?  Let me know.
 
 ## Author
 
