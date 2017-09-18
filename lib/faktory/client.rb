@@ -133,6 +133,7 @@ module Faktory
     def result
       line = @sock.gets
       debug "< #{line}" if @debug
+      raise Errno::ECONNRESET, "No response" unless line
       chr = line[0]
       if chr == '+'
         line[1..-1].strip

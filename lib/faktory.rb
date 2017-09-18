@@ -15,11 +15,15 @@ module Faktory
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
   DEFAULTS = {
-    queues: [],
-    concurrency: 20,
+    queues: ['default'],
+    concurrency: 10,
     require: '.',
     environment: 'development',
-    timeout: 28,
+    # As of 2017, Heroku's process timeout is 30 seconds.
+    # After 30 seconds, processes are KILLed so assume 25
+    # seconds to gracefully shutdown and 5 seconds to hard
+    # shutdown.
+    timeout: 25,
     error_handlers: [],
     lifecycle_events: {
       startup: [],
@@ -45,8 +49,7 @@ module Faktory
   # Configuration for Faktory executor, use like:
   #
   #   Faktory.configure_worker do |config|
-  #     config.faktory = { :url => 'myhost:7419' }
-  #     config.exec_middleware do |chain|
+  #     config.worker_middleware do |chain|
   #       chain.add MyServerHook
   #     end
   #   end
@@ -80,11 +83,7 @@ module Faktory
   end
 
   def self.faktory=(hash)
-    @pool = if hash.is_a?(ConnectionPool)
-      hash
-    else
-      Faktory::Connection.create(hash)
-    end
+    @pool = Faktory::Connection.create(hash)
   end
 
   def self.client_middleware
@@ -93,10 +92,10 @@ module Faktory
     @client_chain
   end
 
-  def self.exec_middleware
-    @exec_chain ||= Middleware::Chain.new
-    yield @exec_chain if block_given?
-    @exec_chain
+  def self.worker_middleware
+    @worker_chain ||= Middleware::Chain.new
+    yield @worker_chain if block_given?
+    @worker_chain
   end
 
   def self.default_job_options=(hash)

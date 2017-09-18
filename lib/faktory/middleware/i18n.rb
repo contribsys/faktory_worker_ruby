@@ -10,7 +10,7 @@ module Faktory::Middleware::I18n
   # to be sent to Faktory.
   class Client
     def call(job, pool)
-      msg['locale'] ||= I18n.locale
+      job['locale'] ||= I18n.locale
       yield
     end
   end
@@ -18,7 +18,7 @@ module Faktory::Middleware::I18n
   # Pull the msg locale out and set the current thread to use it.
   class Server
     def call(worker, job)
-      I18n.locale = msg['locale'] || I18n.default_locale
+      I18n.locale = job['locale'] || I18n.default_locale
       yield
     ensure
       I18n.locale = I18n.default_locale

@@ -15,10 +15,10 @@ module Faktory
   # end
   #
   # To run middleware when a job is executed within the worker process,
-  # add it to the exec_middleware:
+  # add it to the worker_middleware:
   #
   # Faktory.configure_worker do |config|
-  #   config.exec_middleware do |chain|
+  #   config.worker_middleware do |chain|
   #     chain.add MyServerHook
   #     chain.remove ActiveRecord
   #   end

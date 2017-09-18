@@ -26,7 +26,6 @@ module Faktory
 
       base.extend(ClassMethods)
       base.faktory_class_attribute :faktory_options_hash
-      base.faktory_class_attribute :faktory_retry_in_block
     end
 
     def logger
@@ -42,7 +41,7 @@ module Faktory
         @opts = opts
       end
 
-      def perform_later(*args)
+      def perform_async(*args)
         @opts['class'.freeze].client_push(@opts.merge!('args'.freeze => args))
       end
 

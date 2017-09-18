@@ -147,14 +147,11 @@ module Faktory
     end
 
     def process(work)
-      jobstr = work.job
-      queue = work.queue_name
-
+      job = work.job
       begin
-        job_hash = JSON.parse(jobstr)
-        dispatch(job_hash) do |worker|
-          Faktory.exec_middleware.invoke(worker, job_hash) do
-            execute_job(worker, job_hash['args'.freeze])
+        dispatch(job) do |worker|
+          Faktory.worker_middleware.invoke(worker, job) do
+            execute_job(worker, job['args'.freeze])
           end
         end
         work.acknowledge
@@ -163,7 +160,7 @@ module Faktory
         # within the timeout.  Don't acknowledge the work since
         # we didn't properly finish it.
       rescue Exception => ex
-        handle_exception(ex, { :context => "Job raised exception", :job => job_hash, :jobstr => jobstr })
+        handle_exception(ex, { :context => "Job raised exception", :job => job })
         work.fail(ex)
         raise ex
       end

@@ -3,10 +3,6 @@
 require 'faktory/manager'
 
 module Faktory
-  # The Launcher is a very simple Actor whose job is to
-  # start, monitor and stop the core Actors in Faktory.
-  # If any of these actors die, the Faktory executor exits
-  # immediately.
   class Launcher
     include Util
 

@@ -59,20 +59,19 @@ module Faktory
 
       logger.info "Running in #{RUBY_DESCRIPTION}"
       logger.info Faktory::LICENSE
-      logger.info "Upgrade to Faktory Pro for more features and support: http://faktory.org" unless defined?(::Faktory::Pro)
 
       # cache process identity
       Faktory.options[:identity] = identity
 
       # Touch middleware so it isn't lazy loaded by multiple threads, #3043
-      Faktory.exec_middleware
+      Faktory.worker_middleware
 
       # Before this point, the process is initializing with just the main thread.
       # Starting here the process will now have multiple threads running.
       fire_event(:startup)
 
       logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(', ')}" }
-      logger.debug { "Execute Middleware: #{Faktory.exec_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Execute Middleware: #{Faktory.worker_middleware.map(&:klass).join(', ')}" }
 
       logger.info 'Starting processing, hit Ctrl-C to stop' if $stdout.tty?
 
@@ -106,11 +105,9 @@ module Faktory
       Faktory.logger.debug "Got #{sig} signal"
       case sig
       when 'INT'
-        # Handle Ctrl-C in JRuby like MRI
-        # http://jira.codehaus.org/browse/JRUBY-4637
         raise Interrupt
       when 'TERM'
-        # Heroku sends TERM and then waits 10 seconds for process to exit.
+        # Heroku sends TERM and then waits 30 seconds for process to exit.
         raise Interrupt
       when 'TSTP'
         Faktory.logger.info "Received TSTP, no longer accepting new work"
@@ -169,19 +166,8 @@ module Faktory
 
       if File.directory?(options[:require])
         require 'rails'
-        if ::Rails::VERSION::MAJOR == 4
-          # Painful contortions, see 1791 for discussion
-          # No autoloading, we want to force eager load for everything.
-          require File.expand_path("#{options[:require]}/config/application.rb")
-          ::Rails::Application.initializer "faktory.eager_load" do
-            ::Rails.application.config.eager_load = true
-          end
-          require 'faktory/rails'
-          require File.expand_path("#{options[:require]}/config/environment.rb")
-        else
-          require 'faktory/rails'
-          require File.expand_path("#{options[:require]}/config/environment.rb")
-        end
+        require 'faktory/rails'
+        require File.expand_path("#{options[:require]}/config/environment.rb")
         options[:tag] ||= default_tag
       else
         not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
@@ -208,7 +194,7 @@ module Faktory
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
-        logger.info "  Please point Faktory to a Rails 4/5 application or a Ruby file  "
+        logger.info "  Please point Faktory to a Rails 5 application or a Ruby file  "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
@@ -263,7 +249,7 @@ module Faktory
         end
       end
 
-      @parser.banner = "faktory [options]"
+      @parser.banner = "faktory-worker [options]"
       @parser.on_tail "-h", "--help", "Show help" do
         logger.info @parser
         die 1

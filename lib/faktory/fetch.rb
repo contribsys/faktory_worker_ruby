@@ -1,12 +1,17 @@
 # frozen_string_literal: true
+
 module Faktory
-  UnitOfWork = Struct.new(:jid, :job) do
+  UnitOfWork = Struct.new(:job) do
     def acknowledge
       Faktory.server {|c| c.ack(jid) }
     end
 
     def fail(ex)
       Faktory.server {|c| c.fail(jid, ex) }
+    end
+
+    def jid
+      job['jid']
     end
   end
 
@@ -18,8 +23,8 @@ module Faktory
     end
 
     def retrieve_work
-      work = Faktory.server { |conn| conn.pop(*queues_cmd) }
-      UnitOfWork.new(*work) if work
+      work = Faktory.server { |conn| conn.fetch(*queues_cmd) }
+      UnitOfWork.new(work) if work
     end
 
     # Creating the pop command takes into account any
