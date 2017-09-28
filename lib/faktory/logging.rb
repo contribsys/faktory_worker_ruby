@@ -49,7 +49,10 @@ module Faktory
       oldlogger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
-      @logger.formatter = ENV['DYNO'] ? WithoutTimestamp.new : Pretty.new
+      # We assume that any TTY is logging directly to a terminal and needs timestamps.
+      # We assume that any non-TTY is logging to Upstart/Systemd/syslog/Heroku/etc with a decent
+      # logging subsystem that provides a timestamp for each entry.
+      @logger.formatter = log_target.tty? ? Pretty.new : WithoutTimestamp.new
       oldlogger.close if oldlogger && !$TESTING # don't want to close testing's STDOUT logging
       @logger
     end

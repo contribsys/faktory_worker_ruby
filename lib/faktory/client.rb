@@ -51,7 +51,7 @@ module Faktory
 
     def ack(jid)
       transaction do
-        command("ACK", jid)
+        command("ACK", %Q[{"jid":"#{jid}"}])
         ok!
       end
     end
@@ -73,7 +73,7 @@ module Faktory
     # any more jobs anyways.
     def beat
       transaction do
-        command("BEAT", JSON.dump("wid": @@random_process_wid))
+        command("BEAT", %Q[{"wid":"#{@@random_process_wid}"}])
         str = result
         if str == "OK"
           str

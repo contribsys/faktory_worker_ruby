@@ -38,7 +38,6 @@ module Faktory
       @mgr = mgr
       @down = false
       @done = false
-      @job = nil
       @thread = nil
       @reloader = Faktory.options[:reloader]
       @logging = (mgr.options[:job_logger] || Faktory::JobLogger).new
@@ -83,22 +82,21 @@ module Faktory
     end
 
     def process_one
-      @job = fetch
-      if @job
+      work = fetch
+      if work
         @@busy_lock.synchronize do
-          @@busy_counter = @@busy_counter + 1
+          @@busy_count = @@busy_count + 1
         end
         begin
-          process(@job)
+          process(work)
         ensure
           @@busy_lock.synchronize do
-            @@busy_counter = @@busy_counter - 1
+            @@busy_count = @@busy_count - 1
           end
         end
       else
         sleep 1
       end
-      @job = nil
     end
 
     def fetch
@@ -125,11 +123,6 @@ module Faktory
     end
 
     def dispatch(job_hash)
-      # since middleware can mutate the job hash
-      # we clone here so we report the original
-      # job structure to the Web UI
-      pristine = cloned(job_hash)
-
       Faktory::Logging.with_job_hash_context(job_hash) do
         @logging.call(job_hash) do
           # Rails 5 requires a Reloader to wrap code execution.  In order to
@@ -151,7 +144,7 @@ module Faktory
       begin
         dispatch(job) do |worker|
           Faktory.worker_middleware.invoke(worker, job) do
-            execute_job(worker, job['args'.freeze])
+            worker.perform(*job['args'.freeze])
           end
         end
         work.acknowledge
@@ -164,10 +157,6 @@ module Faktory
         work.fail(ex)
         raise ex
       end
-    end
-
-    def execute_job(worker, cloned_args)
-      worker.perform(*cloned_args)
     end
 
     def thread_identity
