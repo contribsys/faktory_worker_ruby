@@ -58,8 +58,9 @@ module Faktory
 
     def fail(jid, ex)
       transaction do
-        command("FAIL", jid, JSON.dump({ message: ex.message[0...1000],
+        command("FAIL", JSON.dump({ message: ex.message[0...1000],
                           errtype: ex.class.name,
+                          jid: jid,
                           backtrace: ex.backtrace}))
         ok!
       end
@@ -90,9 +91,25 @@ module Faktory
       puts line
     end
 
+    def tls?
+      @location.hostname !~ /\Alocalhost\z/ || @location.scheme =~ /tls/
+    end
+
     def open
-      @sock = TCPSocket.new(@location.hostname, @location.port)
-      @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+      if tls?
+        sock = TCPSocket.new(@location.hostname, @location.port)
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
+        ctx.ssl_version = :TLSv1_2
+
+        @sock = OpenSSL::SSL::SSLSocket.new(sock, ctx).tap do |socket|
+          socket.sync_close = true
+          socket.connect
+        end
+      else
+        @sock = TCPSocket.new(@location.hostname, @location.port)
+        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+      end
 
       payload = {
         "wid": @@random_process_wid,
