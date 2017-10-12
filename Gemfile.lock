@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    faktory-ruby (0.5.0)
+    faktory_worker_ruby (0.5.0)
       connection_pool (~> 2.2, >= 2.2.1)
 
 GEM
@@ -15,7 +15,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  faktory-ruby!
+  faktory_worker_ruby!
   minitest (~> 5)
   rake (~> 12)
 

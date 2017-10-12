@@ -2,6 +2,7 @@
 require File.expand_path('../lib/faktory/version', __FILE__)
 
 Gem::Specification.new do |gem|
+  gem.name          = "faktory_worker_ruby"
   gem.authors       = ["Mike Perham"]
   gem.email         = ["mike@contribsys.com"]
   gem.summary       = "Ruby worker for Faktory"
@@ -12,7 +13,6 @@ Gem::Specification.new do |gem|
   gem.executables   = ['faktory-worker']
   gem.files         = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.test_files    = []
-  gem.name          = "faktory-ruby"
   gem.require_paths = ["lib"]
   gem.version       = Faktory::VERSION
   gem.required_ruby_version = ">= 2.2.2"

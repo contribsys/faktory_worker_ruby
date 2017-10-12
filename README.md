@@ -1,6 +1,6 @@
-# faktory-ruby
+# faktory\_worker\_ruby
 
-Faktory-ruby is the official Ruby client and worker process for the
+Faktory\_worker\_ruby is the official Ruby client and worker process for the
 Faktory background job server.  It is similar to [Sidekiq](http://sidekiq.org).
 
 ```
@@ -27,8 +27,8 @@ Faktory background job server.  It is similar to [Sidekiq](http://sidekiq.org).
 * Server - the Faktory daemon which stores background jobs in
   queues to be processed by Workers.
 
-This gem, faktory-ruby, contains only the client and worker parts.  The
-server part is [here](https://github.com/contribsys/faktory/#readme)
+This gem contains only the client and worker parts.  The
+server part is [here](https://github.com/contribsys/faktory/)
 
 ## Installation
 
@@ -36,7 +36,7 @@ First, make sure you have the [Faktory server](https://github.com/contribsys/fak
 
 Next, install this gem:
 
-    gem install faktory-ruby
+    gem install faktory_worker_ruby
 
 ## Your First Job
 
@@ -68,7 +68,7 @@ bundle exec faktory-worker
 
 ## Why not Sidekiq?
 
-Sidekiq is awesome; it's very stable and useful. It suffers from two design limitations:
+Sidekiq is awesome; it's stable and useful. It suffers from two design limitations:
 
 1. Sidekiq uses Redis and Redis is dumb datastore, all Sidekiq features are
    implemented in Ruby and have to travel over the network to access data.
@@ -83,7 +83,7 @@ we can create workers in any programming language.
 If your organization is 100% Ruby, Sidekiq will serve you well.  If your
 organization is polyglot, Faktory will be a better fit.
 
-Faktory-ruby tries to be Sidekiq API compatible where possible (and
+faktory\_worker\_ruby tries to be Sidekiq API compatible where possible (and
 PRs to improve this are very welcome).
 
 ## Author
