@@ -15,9 +15,9 @@ module Faktory
   #
   # Then in your Rails app, you can do this:
   #
-  #   HardJob.perform_later(1, 2, 3)
+  #   HardJob.perform_async(1, 2, 3)
   #
-  # Note that perform_later is a class method, perform is an instance method.
+  # Note that perform_async is a class method, perform is an instance method.
   module Job
     attr_accessor :jid
 
