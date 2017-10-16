@@ -21,7 +21,6 @@ module Faktory
     # Note above, the URL can contain the password for secure installations.
     def initialize(url: 'tcp://localhost:7419', debug: false)
       @debug = debug
-      @middleware = Faktory.client_middleware.dup
       @location = uri_from_env || URI(url)
       open
     end
@@ -37,6 +36,7 @@ module Faktory
       transaction do
         command "PUSH", JSON.generate(job)
         ok!
+        job["jid"]
       end
     end
 
@@ -147,6 +147,8 @@ module Faktory
       end
     end
 
+    # I love pragmatic, simple protocols.  Thanks antirez!
+    # https://redis.io/topics/protocol
     def result
       line = @sock.gets
       debug "< #{line}" if @debug

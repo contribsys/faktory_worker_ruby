@@ -51,8 +51,9 @@ module Faktory
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
+        at = Time.at(ts).utc.to_datetime.rfc3339(9)
 
-        @opts.merge! 'args'.freeze => args, 'at'.freeze => ts
+        @opts.merge! 'args'.freeze => args, 'at'.freeze => at
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         @opts.delete('at'.freeze) if ts <= now
         @opts['class'.freeze].client_push(@opts)
@@ -76,12 +77,9 @@ module Faktory
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
+        item = { 'class'.freeze => self, 'args'.freeze => args }
 
-        item = { 'class'.freeze => self, 'args'.freeze => args, 'at'.freeze => ts }
-
-        # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at'.freeze) if ts <= now
-
+        item['at'] = Time.at(ts).utc.to_datetime.rfc3339(9) if ts > now
         client_push(item)
       end
       alias_method :perform_at, :perform_in
@@ -106,12 +104,19 @@ module Faktory
 
       def client_push(item) # :nodoc:
         pool = Thread.current[:faktory_via_pool] || get_faktory_options['pool'.freeze] || Faktory.server_pool
+        item = get_faktory_options.merge(item)
         # stringify
         item.keys.each do |key|
           item[key.to_s] = item.delete(key)
         end
+        item["jid"] ||= SecureRandom.hex(12)
+        item["queue"] ||= "default"
 
-        pool.with {|c| c.push(item) }
+        Faktory.client_middleware.invoke(item, pool) do
+          pool.with do |c|
+            c.push(item)
+          end
+        end
       end
 
       def faktory_class_attribute(*attrs)

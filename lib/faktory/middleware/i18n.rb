@@ -9,16 +9,17 @@ module Faktory::Middleware::I18n
   # Get the current locale and store it in the message
   # to be sent to Faktory.
   class Client
-    def call(job, pool)
-      job['locale'] ||= I18n.locale
+    def call(payload, pool)
+      c = payload["custom"] ||= {}
+      c['locale'] ||= ::I18n.locale
       yield
     end
   end
 
   # Pull the msg locale out and set the current thread to use it.
-  class Server
-    def call(worker, job)
-      I18n.locale = job['locale'] || I18n.default_locale
+  class Worker
+    def call(jobinst, payload)
+      I18n.locale = payload.dig("custom", "locale") || I18n.default_locale
       yield
     ensure
       I18n.locale = I18n.default_locale
@@ -36,7 +37,7 @@ Faktory.configure_worker do |config|
   config.client_middleware do |chain|
     chain.add Faktory::Middleware::I18n::Client
   end
-  config.server_middleware do |chain|
-    chain.add Faktory::Middleware::I18n::Server
+  config.worker_middleware do |chain|
+    chain.add Faktory::Middleware::I18n::Worker
   end
 end

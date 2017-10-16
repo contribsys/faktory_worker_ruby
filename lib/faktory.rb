@@ -73,12 +73,12 @@ module Faktory
 
   def self.server
     raise ArgumentError, "requires a block" unless block_given?
-    faktory_pool.with do |conn|
+    server_pool.with do |conn|
       yield conn
     end
   end
 
-  def self.faktory_pool
+  def self.server_pool
     @pool ||= Faktory::Connection.create
   end
 

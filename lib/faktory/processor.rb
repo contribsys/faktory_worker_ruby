@@ -122,17 +122,17 @@ module Faktory
       nil
     end
 
-    def dispatch(job_hash)
-      Faktory::Logging.with_job_hash_context(job_hash) do
-        @logging.call(job_hash) do
+    def dispatch(payload)
+      Faktory::Logging.with_job_hash_context(payload) do
+        @logging.call(payload) do
           # Rails 5 requires a Reloader to wrap code execution.  In order to
           # constantize the worker and instantiate an instance, we have to call
           # the Reloader.  It handles code loading, db connection management, etc.
           # Effectively this block denotes a "unit of work" to Rails.
           @reloader.call do
-            klass  = constantize(job_hash['jobtype'.freeze])
-            worker = klass.new
-            worker.jid = job_hash['jid'.freeze]
+            klass  = constantize(payload['jobtype'.freeze])
+            jobinst = klass.new
+            jobinst.jid = payload['jid'.freeze]
             yield worker
           end
         end
@@ -140,11 +140,11 @@ module Faktory
     end
 
     def process(work)
-      job = work.job
+      payload = work.job
       begin
-        dispatch(job) do |worker|
-          Faktory.worker_middleware.invoke(worker, job) do
-            worker.perform(*job['args'.freeze])
+        dispatch(payload) do |jobinst|
+          Faktory.worker_middleware.invoke(jobinst, payload) do
+            worker.perform(*payload['args'.freeze])
           end
         end
         work.acknowledge
