@@ -186,8 +186,11 @@ Invalid FAKTORY_PROVIDER '#{prov}', it should be the name of the ENV variable th
     MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
 EOM
       val = ENV[prov]
-      return nil unless val
-      URI(val)
+      return URI(val) if val
+
+      val = ENV['FAKTORY_URL']
+      return URI(val) if val
+      nil
     end
 
   end
