@@ -9,6 +9,7 @@ GEM
   specs:
     connection_pool (2.2.1)
     minitest (5.10.3)
+    minitest-hooks (1.4.2)
     rake (12.1.0)
 
 PLATFORMS
@@ -17,6 +18,7 @@ PLATFORMS
 DEPENDENCIES
   faktory_worker_ruby!
   minitest (~> 5)
+  minitest-hooks
   rake (~> 12)
 
 BUNDLED WITH

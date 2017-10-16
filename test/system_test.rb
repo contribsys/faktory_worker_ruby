@@ -1,6 +1,11 @@
 require 'helper'
 
-class SystemTest < Minitest::Test
+class SystemTest < LiveTest
+  def around
+    Faktory.server{|s| s.flush }
+    super
+  end
+
   def randjob(idx)
     {
       jid: "1231278127839" + idx.to_s,

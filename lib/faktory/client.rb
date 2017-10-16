@@ -32,6 +32,14 @@ module Faktory
       @sock = nil
     end
 
+    # Warning: this clears all job data in Faktory
+    def flush
+      transaction do
+        command "FLUSH"
+        ok!
+      end
+    end
+
     def push(job)
       transaction do
         command "PUSH", JSON.generate(job)

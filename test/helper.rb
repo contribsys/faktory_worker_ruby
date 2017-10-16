@@ -8,3 +8,8 @@ module I18n
     "en"
   end
 end
+
+require 'minitest/hooks/test'
+class LiveTest < Minitest::Test
+  include Minitest::Hooks
+end
