@@ -42,7 +42,7 @@ module Faktory
       end
 
       def perform_async(*args)
-        @opts['class'.freeze].client_push(@opts.merge!('args'.freeze => args))
+        @opts['jobtype'.freeze].client_push(@opts.merge!('args'.freeze => args))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -56,7 +56,7 @@ module Faktory
         @opts.merge! 'args'.freeze => args, 'at'.freeze => at
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         @opts.delete('at'.freeze) if ts <= now
-        @opts['class'.freeze].client_push(@opts)
+        @opts['jobtype'.freeze].client_push(@opts)
       end
       alias_method :perform_at, :perform_in
     end
@@ -64,11 +64,11 @@ module Faktory
     module ClassMethods
 
       def set(options)
-        Setter.new(options.merge!('class'.freeze => self))
+        Setter.new(options.merge!('jobtype'.freeze => self))
       end
 
       def perform_async(*args)
-        client_push('class'.freeze => self, 'args'.freeze => args)
+        client_push('jobtype'.freeze => self, 'args'.freeze => args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -77,7 +77,7 @@ module Faktory
         int = interval.to_f
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
-        item = { 'class'.freeze => self, 'args'.freeze => args }
+        item = { 'jobtype'.freeze => self, 'args'.freeze => args }
 
         item['at'] = Time.at(ts).utc.to_datetime.rfc3339(9) if ts > now
         client_push(item)

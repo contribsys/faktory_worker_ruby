@@ -11,7 +11,7 @@ module Faktory
 
       # Provide a call() method that returns the formatted message.
       def call(severity, time, program_name, message)
-        "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
+        "#{time.utc.rfc3339(3)} #{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
       end
 
       def context
@@ -29,7 +29,7 @@ module Faktory
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'.freeze] || job_hash["class".freeze]
+      klass = job_hash['wrapped'.freeze] || job_hash["jobtype".freeze]
       "#{klass} JID-#{job_hash['jid'.freeze]}"
     end
 
