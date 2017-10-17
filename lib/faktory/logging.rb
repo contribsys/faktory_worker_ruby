@@ -11,7 +11,7 @@ module Faktory
 
       # Provide a call() method that returns the formatted message.
       def call(severity, time, program_name, message)
-        "#{time.utc.rfc3339(3)} #{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
+        "#{time.utc.iso8601(3)} #{::Process.pid} TID-#{Thread.current.object_id.to_s(36)}#{context} #{severity}: #{message}\n"
       end
 
       def context

@@ -133,7 +133,7 @@ module Faktory
             klass  = constantize(payload['jobtype'.freeze])
             jobinst = klass.new
             jobinst.jid = payload['jid'.freeze]
-            yield worker
+            yield jobinst
           end
         end
       end
@@ -144,7 +144,7 @@ module Faktory
       begin
         dispatch(payload) do |jobinst|
           Faktory.worker_middleware.invoke(jobinst, payload) do
-            worker.perform(*payload['args'.freeze])
+            jobinst.perform(*payload['args'.freeze])
           end
         end
         work.acknowledge
