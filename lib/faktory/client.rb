@@ -93,6 +93,14 @@ module Faktory
       end
     end
 
+    def info
+      transaction do
+        command("INFO")
+        str = result
+        JSON.parse(str) if str
+      end
+    end
+
     private
 
     def debug(line)
@@ -125,12 +133,20 @@ module Faktory
         "pid": $$,
         "labels": ["ruby-#{RUBY_VERSION}"],
       }
-      if @location.password
-        payload["salt"] = salt = SecureRandom.hex(8)
-        payload["pwdhash"] = Digest::SHA256.hexdigest(@location.password + salt)
+
+      hi = result
+      if hi =~ /\AHI (.*)/
+        hash = JSON.parse($1)
+        # TODO verify version tag
+        salt = hash["s"]
+        pwd = @location.password
+        if salt && !pwd
+          raise ArgumentError, "Server requires password, but none has been configured"
+        end
+        payload["pwdhash"] = Digest::SHA256.hexdigest(pwd + salt)
       end
 
-      command("AHOY", JSON.dump(payload))
+      command("HELLO", JSON.dump(payload))
       ok!
     end
 
