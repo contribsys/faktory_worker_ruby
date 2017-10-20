@@ -135,15 +135,18 @@ module Faktory
       }
 
       hi = result
+
       if hi =~ /\AHI (.*)/
         hash = JSON.parse($1)
         # TODO verify version tag
         salt = hash["s"]
-        pwd = @location.password
-        if salt && !pwd
-          raise ArgumentError, "Server requires password, but none has been configured"
+        if salt
+          pwd = @location.password
+          if !pwd
+            raise ArgumentError, "Server requires password, but none has been configured"
+          end
+          payload["pwdhash"] = Digest::SHA256.hexdigest(pwd + salt)
         end
-        payload["pwdhash"] = Digest::SHA256.hexdigest(pwd + salt)
       end
 
       command("HELLO", JSON.dump(payload))
