@@ -7,13 +7,12 @@ Gem::Specification.new do |gem|
   gem.email         = ["mike@contribsys.com"]
   gem.summary       = "Ruby worker for Faktory"
   gem.description   = "Ruby worker for Faktory."
-  gem.homepage      = "http://contribsys.com"
+  gem.homepage      = "http://github.com/contribsys/faktory_worker_ruby"
   gem.license       = "LGPL-3.0"
 
   gem.executables   = ['faktory-worker']
   gem.files         = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.test_files    = []
-  gem.require_paths = ["lib"]
   gem.version       = Faktory::VERSION
   gem.required_ruby_version = ">= 2.2.2"
 
