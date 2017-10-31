@@ -9,7 +9,7 @@ module Faktory
       #
       # None of this matters on the client-side, only within the Faktory executor itself.
       #
-      Faktory.configure_exec do |_|
+      Faktory.configure_client do |_|
         Faktory.options[:reloader] = Faktory::Rails::Reloader.new
       end
     end
