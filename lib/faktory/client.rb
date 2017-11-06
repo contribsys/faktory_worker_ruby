@@ -108,7 +108,8 @@ module Faktory
     end
 
     def tls?
-      @location.hostname !~ /\Alocalhost\z/ || @location.scheme =~ /tls/
+      # Support TLS with this convention: "tcp+tls://:password@myhostname:port/"
+      @location.scheme =~ /tls/
     end
 
     def open
@@ -138,14 +139,28 @@ module Faktory
 
       if hi =~ /\AHI (.*)/
         hash = JSON.parse($1)
-        # TODO verify version tag
+        ver = hash["v"].to_i
+        if ver > 2
+          puts "Warning: Faktory server protocol #{ver} in use, this worker doesn't speak that version."
+          puts "We recommend you upgrade this gem with `bundle up faktory_worker_ruby`."
+        end
+
         salt = hash["s"]
         if salt
           pwd = @location.password
           if !pwd
             raise ArgumentError, "Server requires password, but none has been configured"
           end
-          payload["pwdhash"] = Digest::SHA256.hexdigest(pwd + salt)
+          iter = hash["i"] || 1
+          raise ArgumentError, "Invalid hashing" if iter < 1
+
+          sha = Digest::SHA256.new
+          hashing = pwd + salt
+          iter.times do
+            sha.update(hashing)
+            hashing = sha.digest
+          end
+          payload["pwdhash"] = sha.hexdigest
         end
       end
 
@@ -185,9 +200,9 @@ module Faktory
         line[1..-1].strip
       elsif chr == '$'
         count = line[1..-1].strip.to_i
-        data = nil
+        return nil if count == -1
         data = @sock.read(count) if count > 0
-        line = @sock.gets
+        line = @sock.gets # read extra linefeeds
         data
       elsif chr == '-'
         raise CommandError, line[1..-1]
