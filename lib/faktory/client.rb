@@ -8,7 +8,13 @@ module Faktory
   class ParseError < StandardError;end
 
   class Client
-    @@random_process_wid = SecureRandom.hex(8)
+    @@random_process_wid = ""
+
+    # Called when booting the worker process to signal that this process
+    # will consume jobs and send BEAT.
+    def self.worker!
+      @@random_process_wid = SecureRandom.hex(8)
+    end
 
     attr_accessor :middleware
 
@@ -88,7 +94,7 @@ module Faktory
           str
         else
           hash = JSON.parse(str)
-          hash["signal"]
+          hash["state"]
         end
       end
     end
@@ -133,6 +139,7 @@ module Faktory
         "hostname": Socket.gethostname,
         "pid": $$,
         "labels": ["ruby-#{RUBY_VERSION}"],
+        "v": 2,
       }
 
       hi = result

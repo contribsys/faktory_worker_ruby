@@ -41,6 +41,8 @@ module Faktory
     # global process state irreversibly.  PRs which improve the
     # test coverage of Faktory::CLI are welcomed.
     def run
+      Faktory::Client.worker!
+
       boot_system
       print_banner
 
@@ -71,7 +73,7 @@ module Faktory
       fire_event(:startup)
 
       logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(', ')}" }
-      logger.debug { "Execute Middleware: #{Faktory.worker_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Worker Middleware: #{Faktory.worker_middleware.map(&:klass).join(', ')}" }
 
       logger.info 'Starting processing, hit Ctrl-C to stop' if $stdout.tty?
 
