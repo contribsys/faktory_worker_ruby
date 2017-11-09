@@ -38,6 +38,10 @@ Next, install this gem:
 
     gem install faktory_worker_ruby
 
+## Documentation
+
+See the [wiki](//github.com/contribsys/faktory_worker_ruby/wiki) for more details.
+
 ## Your First Job
 
 Your Jobs should include the Faktory::Job module and have a `perform`
