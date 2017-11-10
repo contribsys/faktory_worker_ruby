@@ -14,10 +14,9 @@ module Faktory
       sha = Digest::SHA256.new
       hashing = pwd + salt
       iter.times do
-        sha.update(hashing)
-        hashing = sha.digest
+        hashing = sha.digest(hashing)
       end
-      sha.hexdigest
+      Digest.hexencode(hashing)
     end
 
 
