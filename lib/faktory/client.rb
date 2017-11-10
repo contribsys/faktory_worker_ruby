@@ -10,6 +10,17 @@ module Faktory
   class Client
     @@random_process_wid = ""
 
+    HASHER = proc do |iter, pwd, salt|
+      sha = Digest::SHA256.new
+      hashing = pwd + salt
+      iter.times do
+        sha.update(hashing)
+        hashing = sha.digest
+      end
+      sha.hexdigest
+    end
+
+
     # Called when booting the worker process to signal that this process
     # will consume jobs and send BEAT.
     def self.worker!
@@ -158,22 +169,17 @@ module Faktory
           if !pwd
             raise ArgumentError, "Server requires password, but none has been configured"
           end
-          iter = hash["i"] || 1
+          iter = (hash["i"] || 1).to_i
           raise ArgumentError, "Invalid hashing" if iter < 1
 
-          sha = Digest::SHA256.new
-          hashing = pwd + salt
-          iter.times do
-            sha.update(hashing)
-            hashing = sha.digest
-          end
-          payload["pwdhash"] = sha.hexdigest
+          payload["pwdhash"] = HASHER.(iter, pwd, salt)
         end
       end
 
       command("HELLO", JSON.dump(payload))
       ok!
     end
+
 
     def command(*args)
       cmd = args.join(" ")
