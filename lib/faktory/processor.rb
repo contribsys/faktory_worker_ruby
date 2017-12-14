@@ -153,7 +153,7 @@ module Faktory
         # within the timeout.  Don't acknowledge the work since
         # we didn't properly finish it.
       rescue Exception => ex
-        handle_exception(ex, { :context => "Job raised exception", :job => job })
+        handle_exception(ex, { :context => "Job raised exception", :job => work.job })
         work.fail(ex)
         raise ex
       end
