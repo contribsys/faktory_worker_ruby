@@ -235,14 +235,15 @@ module Faktory
     # MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
     def uri_from_env
       prov = ENV['FAKTORY_PROVIDER']
-      return nil unless prov
-      raise(ArgumentError, <<-EOM) if prov.index(":")
-Invalid FAKTORY_PROVIDER '#{prov}', it should be the name of the ENV variable that contains the URL
-    FAKTORY_PROVIDER=MY_FAKTORY_URL
-    MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
-EOM
-      val = ENV[prov]
-      return URI(val) if val
+      if prov
+        raise(ArgumentError, <<-EOM) if prov.index(":")
+  Invalid FAKTORY_PROVIDER '#{prov}', it should be the name of the ENV variable that contains the URL
+      FAKTORY_PROVIDER=MY_FAKTORY_URL
+      MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
+  EOM
+        val = ENV[prov]
+        return URI(val) if val
+      end
 
       val = ENV['FAKTORY_URL']
       return URI(val) if val

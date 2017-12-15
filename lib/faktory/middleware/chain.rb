@@ -9,7 +9,7 @@ module Faktory
   # To add middleware to run when a job is pushed to Faktory:
   #
   # Faktory.configure_client do |config|
-  #   config.push_middleware do |chain|
+  #   config.client_middleware do |chain|
   #     chain.add MyClientHook
   #   end
   # end
@@ -27,15 +27,15 @@ module Faktory
   # To insert immediately preceding another entry:
   #
   # Faktory.configure_client do |config|
-  #   config.middleware do |chain|
-  #     chain.insert_before ActiveRecord, MyClientHook
+  #   config.client_middleware do |chain|
+  #     chain.insert_before SomeOtherMiddleware, MyClientHook
   #   end
   # end
   #
   # To insert immediately after another entry:
   #
   # Faktory.configure_client do |config|
-  #   config.middleware do |chain|
+  #   config.client_middleware do |chain|
   #     chain.insert_after ActiveRecord, MyClientHook
   #   end
   # end
