@@ -35,9 +35,9 @@ module Faktory
     # MY_FAKTORY_URL=tcp://:somepass@my-server.example.com:7419
     #
     # Note above, the URL can contain the password for secure installations.
-    def initialize(url: 'tcp://localhost:7419', debug: false)
+    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false)
       @debug = debug
-      @location = uri_from_env || URI(url)
+      @location = URI(url)
       open
     end
 
