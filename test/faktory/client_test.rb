@@ -18,7 +18,7 @@ class ClientFaktory < Minitest::Test
     ENV["FAKTORY_PROVIDER"] = "FAKTORY_URL"
     ENV["FAKTORY_URL"] = "tcp://127.0.0.1:7419"
 
-    client = Faktory::Client.new(url: 'tcp://lvh.me:7419')
-    assert_equal URI("tcp://lvh.me:7419"), client.instance_variable_get(:@location)
+    client = Faktory::Client.new(url: 'tcp://localhost:7419')
+    assert_equal URI("tcp://localhost:7419"), client.instance_variable_get(:@location)
   end
 end
