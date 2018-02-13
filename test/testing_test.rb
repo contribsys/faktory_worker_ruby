@@ -33,6 +33,21 @@ class TestingTest < LiveTest
         refute Faktory::Testing.fake?
       end
 
+      it 'enables inilne testing in a block' do
+        Faktory::Testing.disable!
+        assert Faktory::Testing.disabled?
+        refute Faktory::Testing.inline?
+
+        Faktory::Testing.inline! do
+          assert Faktory::Testing.enabled?
+          assert Faktory::Testing.inline?
+          refute Faktory::Testing.fake?
+        end
+
+        refute Faktory::Testing.enabled?
+        refute Faktory::Testing.inline?
+      end
+
       it 'disables testing in a block' do
         Faktory::Testing.fake!
         assert Faktory::Testing.fake?
