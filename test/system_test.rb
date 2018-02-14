@@ -2,6 +2,8 @@ require 'helper'
 
 class SystemTest < LiveTest
   def around
+    Faktory::Testing.disable!
+    Faktory.reset_pool
     Faktory.server{|s| s.flush }
     super
   end

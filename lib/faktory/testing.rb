@@ -69,6 +69,7 @@ module Faktory
     def push(job)
       if Faktory::Testing.enabled?
         Faktory::Testing::Runner.new(job).push
+        return job['jid']
       else
         real_push(job)
       end
