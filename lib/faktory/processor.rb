@@ -39,9 +39,9 @@ module Faktory
       @down = false
       @done = false
       @thread = nil
-      @reloader = Faktory.options[:reloader]
+      @reloader = mgr.options[:reloader]
       @logging = (mgr.options[:job_logger] || Faktory::JobLogger).new
-      @fetcher = Faktory::Fetcher.new(Faktory.options)
+      @fetcher = Faktory::Fetcher.new(mgr.options)
     end
 
     def terminate(wait=false)
