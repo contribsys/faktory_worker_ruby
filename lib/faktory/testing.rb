@@ -31,11 +31,11 @@ module Faktory
     end
 
     def self.inline!(&block)
-      # Don't allow blockless inline
+      # Only allow blockless inline via `blockless_inline_is_a_bad_idea_but_I_wanna_do_it_anyway!`
       # https://github.com/mperham/sidekiq/issues/3495
-      #unless block_given?
-        #raise 'Must provide a block to Faktory::Testing.inline!'
-      #end
+      unless block_given?
+        raise 'Must provide a block to Faktory::Testing.inline!'
+      end
 
       __set_test_mode(:inline, &block)
     end
