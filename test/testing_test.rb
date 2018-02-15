@@ -18,6 +18,13 @@ class TestingTest < LiveTest
         refute Faktory::Testing.inline?
       end
 
+      it 'enables blockless inline testing, which is generally a bad idea' do
+        Faktory::Testing.blockless_inline_is_a_bad_idea_but_I_wanna_do_it_anyway!
+        assert Faktory::Testing.enabled?
+        assert Faktory::Testing.inline?
+        refute Faktory::Testing.fake?
+      end
+
       it 'enables fake testing in a block' do
         Faktory::Testing.disable!
         assert Faktory::Testing.disabled?

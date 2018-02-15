@@ -33,8 +33,8 @@ class TestingFakeTest < LiveTest
     end
 
     after do
-      Faktory::Testing.disable!
       Faktory::Queues.clear_all
+      Faktory::Testing.disable!
     end
 
     it 'stubs the async call' do
