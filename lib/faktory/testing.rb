@@ -1,5 +1,3 @@
-require 'faktory/testing/runner'
-
 module Faktory
   module Testing
     def self.__test_mode
@@ -33,13 +31,17 @@ module Faktory
     end
 
     def self.inline!(&block)
-      # Don't allow blockless inline
+      # Only allow blockless inline via `blockless_inline_is_a_bad_idea_but_I_wanna_do_it_anyway!`
       # https://github.com/mperham/sidekiq/issues/3495
       unless block_given?
         raise 'Must provide a block to Faktory::Testing.inline!'
       end
 
       __set_test_mode(:inline, &block)
+    end
+
+    def self.blockless_inline_is_a_bad_idea_but_I_wanna_do_it_anyway!
+      __set_test_mode(:inline)
     end
 
     def self.enabled?
@@ -63,13 +65,16 @@ module Faktory
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
-        constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
+        # the false flag limits search for name to under the constant namespace
+        # which mimics Rails' behaviour
+        constant.const_defined?(name, false) ? constant.const_get(name, false) : constant.const_missing(name)
       end
     end
   end
 
-  # Fake it 'til you make it by default
-  Faktory::Testing.fake!
+  # Test modes have to be opted into explicitly.
+  # Just requiring the testing module shouldn't automatically change the testing mode.
+  Faktory::Testing.disable!
 
   class EmptyQueueError < RuntimeError; end
 
@@ -79,7 +84,9 @@ module Faktory
 
     def push(job)
       if Faktory::Testing.inline?
-        Faktory::Testing::Runner.new(job).push
+        job = Faktory.load_json(Faktory.dump_json(job))
+        job_class = Faktory::Testing.constantize(job['jobtype'])
+        job_class.new.perform(*job['args'])
         return job['jid']
       elsif Faktory::Testing.fake?
         job = Faktory.load_json(Faktory.dump_json(job))

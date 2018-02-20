@@ -86,10 +86,6 @@ module Faktory
     @pool = Faktory::Connection.create(hash)
   end
 
-  def self.reset_pool
-    @pool = nil
-  end
-
   def self.client_middleware
     @client_chain ||= Middleware::Chain.new
     yield @client_chain if block_given?
