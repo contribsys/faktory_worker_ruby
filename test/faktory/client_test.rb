@@ -1,6 +1,12 @@
 require 'helper'
 
 class ClientFaktory < Minitest::Test
+  def teardown
+    # Ensure that these tests aren't dependent on run order
+    ENV["FAKTORY_PROVIDER"] = nil
+    ENV["FAKTORY_URL"] = nil
+  end
+
   def test_client_initialized_with_default_url
     client = Faktory::Client.new
     assert_equal URI("tcp://localhost:7419"), client.instance_variable_get(:@location)

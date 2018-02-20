@@ -2,6 +2,10 @@ require 'helper'
 
 class SystemTest < LiveTest
   def around
+    # We reset the pool since we're switching back and forth between test/non-test mode,
+    # within the FWR test suite and the pool may or may not be useable for live tests
+    # depending on the order of the execution of test cases.
+    Faktory.instance_variable_set(:@pool, nil)
     Faktory.server{|s| s.flush }
     super
   end

@@ -2,6 +2,7 @@ require 'minitest/pride'
 require 'minitest/autorun'
 
 require 'faktory'
+require 'faktory/testing'
 
 module I18n
   def self.locale
