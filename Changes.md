@@ -1,5 +1,11 @@
 # Changes
 
+## HEAD
+
+- Add testing API, almost identical to Sidekiq's `sidekiq/testing` API.
+  [#7, thebadmonkeydev, jagthedrummer]
+
+
 ## 0.6.1
 
 - Fix password hashing
