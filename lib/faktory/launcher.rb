@@ -9,9 +9,10 @@ module Faktory
     attr_accessor :manager
 
     def initialize(options)
-      @manager = Faktory::Manager.new(options)
+      merged_options = Faktory.options.merge(options)
+      @manager = Faktory::Manager.new(merged_options)
       @done = false
-      @options = options
+      @options = merged_options
     end
 
     def run
