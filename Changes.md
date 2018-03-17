@@ -1,10 +1,9 @@
 # Changes
 
-## HEAD
+## 0.7.0
 
 - Add testing API, almost identical to Sidekiq's `sidekiq/testing` API.
   [#7, thebadmonkeydev, jagthedrummer]
-
 
 ## 0.6.1
 
