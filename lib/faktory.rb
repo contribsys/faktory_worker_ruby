@@ -8,6 +8,8 @@ require 'faktory/middleware/chain'
 require 'faktory/job'
 require 'faktory/connection'
 
+require 'active_job/queue_adapters/faktory_adapter'
+
 require 'json'
 
 module Faktory
