@@ -13,7 +13,6 @@ require 'json'
 require 'active_job/queue_adapters/faktory_adapter' if defined?(Rails)
 
 module Faktory
-
   NAME = 'Faktory'.freeze
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 
