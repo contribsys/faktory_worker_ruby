@@ -8,11 +8,12 @@ require 'faktory/middleware/chain'
 require 'faktory/job'
 require 'faktory/connection'
 
-require 'active_job/queue_adapters/faktory_adapter'
-
 require 'json'
 
+require 'active_job/queue_adapters/faktory_adapter' if defined?(Rails)
+
 module Faktory
+
   NAME = 'Faktory'.freeze
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
 

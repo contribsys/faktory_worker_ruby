@@ -1,4 +1,5 @@
 require 'helper'
+require 'active_job/queue_adapters/faktory_adapter'
 
 class FaktoryAdapterTest < LiveTest
   describe 'ActiveJob adapter' do
