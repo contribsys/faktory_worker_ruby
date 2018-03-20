@@ -188,6 +188,12 @@ module Faktory
 
         require(options[:require]) || raise(ArgumentError, not_required_message)
       end
+
+      # We hit this during faktory-worker boot, it allows jobs that were queued
+      # with the ActiveJob adapter to be processed correctly.
+      if defined?(::ActiveJob)
+        require 'active_job/queue_adapters/faktory_adapter'
+      end
     end
 
     def default_tag
