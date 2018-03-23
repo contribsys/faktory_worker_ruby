@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 module Faktory
   class Rails < ::Rails::Engine
+    # This hook happens after `Rails::Application` is inherited within
+    # config/application.rb and before config is touched, usually within the
+    # class block. Definitely before config/environments/*.rb and
+    # config/initializers/*.rb.
+    config.before_configuration do
+      if defined?(::ActiveJob)
+        require 'active_job/queue_adapters/faktory_adapter'
+      end
+    end
+
     config.after_initialize do
       # This hook happens after all initializers are run, just before returning
       # from config/environment.rb back to faktory/cli.rb.

@@ -10,12 +10,6 @@ require 'faktory/connection'
 
 require 'json'
 
-# We hit this during application boot of a Rails app and allows
-# use of the :faktory ActiveJob adapter for pushing jobs to Faktory.
-if defined?(::ActiveJob)
-  require 'active_job/queue_adapters/faktory_adapter'
-end
-
 module Faktory
   NAME = 'Faktory'.freeze
   LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
