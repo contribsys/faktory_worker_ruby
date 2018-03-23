@@ -1,5 +1,11 @@
 # Changes
 
+## 0.7.1
+
+- Add an ActiveJob adapter for Faktory.
+
+  [#17, jagthedrummer]
+
 ## 0.7.0
 
 - Add testing API, almost identical to Sidekiq's `sidekiq/testing` API.
