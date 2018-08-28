@@ -19,10 +19,8 @@ module Faktory::Middleware::I18n
   # Pull the msg locale out and set the current thread to use it.
   class Worker
     def call(jobinst, payload)
-      I18n.locale = payload.dig("custom", "locale") || I18n.default_locale
-      yield
-    ensure
-      I18n.locale = I18n.default_locale
+      locale = payload.dig("custom", "locale") || I18n.default_locale
+      I18n.with_locale(locale) { yield }
     end
   end
 end
