@@ -7,23 +7,24 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (5.1.5)
-      activesupport (= 5.1.5)
+    activejob (5.2.1)
+      activesupport (= 5.2.1)
       globalid (>= 0.3.6)
-    activesupport (5.1.5)
+    activesupport (5.2.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (~> 0.7)
+      i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     concurrent-ruby (1.0.5)
-    connection_pool (2.2.1)
+    connection_pool (2.2.2)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
-    i18n (0.9.5)
+    i18n (1.1.0)
       concurrent-ruby (~> 1.0)
-    minitest (5.10.3)
-    minitest-hooks (1.4.2)
-    rake (12.1.0)
+    minitest (5.11.3)
+    minitest-hooks (1.5.0)
+      minitest (> 5.3)
+    rake (12.3.1)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
@@ -39,4 +40,4 @@ DEPENDENCIES
   rake (~> 12)
 
 BUNDLED WITH
-   1.16.0
+   1.16.3
