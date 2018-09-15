@@ -1,6 +1,7 @@
 require 'socket'
 require 'json'
 require 'uri'
+require 'digest'
 require 'securerandom'
 
 module Faktory
