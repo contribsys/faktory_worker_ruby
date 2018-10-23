@@ -20,7 +20,9 @@ module Faktory
       # None of this matters on the client-side, only within the Faktory executor itself.
       #
       Faktory.configure_worker do |_|
-        Faktory.options[:reloader] = Faktory::Rails::Reloader.new
+        if ::Rails::VERSION::MAJOR >= 5
+          Faktory.options[:reloader] = Faktory::Rails::Reloader.new
+        end
       end
     end
 
