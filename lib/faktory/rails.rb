@@ -20,9 +20,11 @@ module Faktory
       # None of this matters on the client-side, only within the Faktory executor itself.
       #
       Faktory.configure_worker do |_|
-        if ::Rails::VERSION::MAJOR >= 5
-          Faktory.options[:reloader] = Faktory::Rails::Reloader.new
+        if ::Rails::VERSION::MAJOR < 5
+          raise "Your current version of Rails, #{::Rails::VERSION::STRING}, is not supported"
         end
+        
+        Faktory.options[:reloader] = Faktory::Rails::Reloader.new
       end
     end
 
@@ -42,4 +44,11 @@ module Faktory
       end
     end
   end if defined?(::Rails)
+
+  if defined?(::Rails) && ::Rails::VERSION::MAJOR < 5
+    $stderr.puts("**************************************************")
+    $stderr.puts("🚫 ERROR: Faktory Worker does not support Rails versions under 5.x - please ensure your workers are updated")
+    $stderr.puts("**************************************************")
+    $stderr.puts("")
+  end
 end
