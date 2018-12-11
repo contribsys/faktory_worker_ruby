@@ -235,6 +235,10 @@ module Faktory
           opts[:tag] = arg
         end
 
+        o.on '-l', '--label LABEL', "Process label to use in Faktory UI" do |arg|
+          (opts[:labels] ||= []) << arg
+        end
+
         o.on "-q", "--queue QUEUE[,WEIGHT]", "Queues to process with optional weights" do |arg|
           queue, weight = arg.split(",")
           parse_queue opts, queue, weight

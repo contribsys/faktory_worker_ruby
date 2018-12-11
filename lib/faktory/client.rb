@@ -149,7 +149,7 @@ module Faktory
         "wid": @@random_process_wid,
         "hostname": Socket.gethostname,
         "pid": $$,
-        "labels": ["ruby-#{RUBY_VERSION}"],
+        "labels": Faktory.options[:labels] || ["ruby-#{RUBY_VERSION}"],
         "v": 2,
       }
 
