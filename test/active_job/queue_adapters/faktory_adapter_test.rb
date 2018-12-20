@@ -33,10 +33,22 @@ class FaktoryAdapterTest < LiveTest
       assert_equal 1, ActiveJob::QueueAdapters::FaktoryAdapter::JobWrapper.jobs.size
     end
 
-    it 'can pass along a priority' do
-      TestJob.set(priority: 9).perform_later(123)
+    it 'can pass along options' do
+      # faktory_options is not thread-safe; this is not a recommended pattern to use
+      # in production, set options in the ActiveJob class definition only
+      TestJob.faktory_options({})
+      TestJob.perform_later(123)
+
+      TestJob.faktory_options(retry: 9)
+      TestJob.perform_later(123)
+
+      TestJob.faktory_options(retry: 9, unique_for: 10)
+      TestJob.perform_later(123)
+
       job = ActiveJob::QueueAdapters::FaktoryAdapter::JobWrapper.jobs.last
-      assert_equal 9, job["priority"]
+      assert_equal 9, job["retry"]
+      assert_equal 10, job["custom"]["unique_for"]
+      assert_equal "FaktoryAdapterTest::TestJob", job["custom"]["wrapped"]
     end
 
     it 'can perform a job' do

@@ -1,10 +1,13 @@
 # Changes
 
+## 0.8.0
+
+- Add `-l LABEL` argument for adding labels to a process [#27, jpwinans]
+- Support the quiet and shutdown heartbeat signals from the server [#28]
+
 ## 0.7.1
 
-- Add an ActiveJob adapter for Faktory.
-
-  [#17, jagthedrummer]
+- Add an ActiveJob adapter for FWR. [#17, jagthedrummer]
 
 ## 0.7.0
 
