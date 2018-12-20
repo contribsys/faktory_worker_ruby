@@ -55,7 +55,17 @@ module Faktory
         $0 = PROCTITLES.map {|p| p.call }.join(" ")
 
         begin
-          Faktory.server {|c| c.beat }
+          result = Faktory.server {|c| c.beat }
+          case result
+          when "OK"
+            # all good
+          when "terminate"
+            ::Process.kill('TERM', $$)
+          when "quiet"
+            ::Process.kill('TSTP', $$)
+          else
+            Faktory.logger.warn "Got unexpected BEAT: #{result}"
+          end
         rescue => ex
           # best effort, try again in a few secs
         end
