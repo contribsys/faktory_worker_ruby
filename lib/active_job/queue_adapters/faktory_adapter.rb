@@ -16,7 +16,7 @@ module ActiveJob
         # Faktory::Client does not support symbols as keys
         Faktory::Client.new.push \
           "jid"     => jid,
-          "jobtype" => JobWrapper,
+          "jobtype" => JobWrapper.to_s,
           "custom"  => {
             "wrapped" => job.class.to_s,
           },
@@ -31,7 +31,7 @@ module ActiveJob
         # Faktory::Client does not support symbols as keys
         Faktory::Client.new.push \
           "jid"     => jid,
-          "jobtype" => JobWrapper,
+          "jobtype" => JobWrapper.to_s,
           "custom"  => {
             "wrapped" => job.class.to_s
           },
