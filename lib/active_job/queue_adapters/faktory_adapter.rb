@@ -20,7 +20,6 @@ module ActiveJob
           "custom"  => {
             "wrapped" => job.class.to_s,
           },
-          "priority" => job.priority,
           "queue"   => job.queue_name,
           "args"    => [ job.serialize ]
       end
@@ -35,7 +34,6 @@ module ActiveJob
           "custom"  => {
             "wrapped" => job.class.to_s
           },
-          "priority" => job.priority,
           "queue"   => job.queue_name,
           "args"    => [ job.serialize ],
           "at"      => Time.at(timestamp).utc.to_datetime.rfc3339(9)

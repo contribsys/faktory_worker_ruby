@@ -29,8 +29,8 @@ module Faktory
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash['wrapped'.freeze] || job_hash["jobtype".freeze]
-      "#{klass} JID-#{job_hash['jid'.freeze]}"
+      klass = job_hash['custom']['wrapped'] || job_hash["jobtype"]
+      "#{klass} JID-#{job_hash['jid']}"
     end
 
     def self.with_job_hash_context(job_hash, &block)
