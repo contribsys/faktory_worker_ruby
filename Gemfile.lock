@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    faktory_worker_ruby (0.8.0)
+    faktory_worker_ruby (0.8.1)
       connection_pool (~> 2.2, >= 2.2.1)
 
 GEM
@@ -40,4 +40,4 @@ DEPENDENCIES
   rake (~> 12)
 
 BUNDLED WITH
-   1.16.3
+   1.17.1

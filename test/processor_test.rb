@@ -21,7 +21,14 @@ class TestProcessor < Minitest::Test
     refute uow.failed?
   end
 
-  UnitOfTestWork = Struct.new(:job) do
+  class UnitOfTestWork
+    attr_accessor :job
+    def initialize(job)
+      @job = job
+      @failed = nil
+      @ack = nil
+    end
+
     def acknowledge
       @ack = true
     end
