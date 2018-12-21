@@ -29,7 +29,7 @@ module Faktory
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash['custom']['wrapped'] || job_hash["jobtype"]
+      klass = job_hash.dig('custom', 'wrapped') || job_hash["jobtype"]
       "#{klass} JID-#{job_hash['jid']}"
     end
 

@@ -17,7 +17,7 @@ Faktory background job server.  It is similar to [Sidekiq](http://sidekiq.org).
 +-----------------+                            +-------------------+
 |                 |                            |                   |
 |    Client       |                            |     Worker        |
-|    pushes       |                            |     pulls         |
+|    pushes       |                            |     fetches       |
 |     jobs        |                            |      jobs         |
 |                 |                            |                   |
 |                 |                            |                   |
@@ -32,11 +32,12 @@ Faktory background job server.  It is similar to [Sidekiq](http://sidekiq.org).
 This gem contains only the client and worker parts.  The
 server part is [here](https://github.com/contribsys/faktory/)
 
+## Requirements
+
+* Ruby 2.3 or higher
+* Faktory 0.9 or higher [Installation](https://github.com/contribsys/faktory/wiki/Installation)
+
 ## Installation
-
-First, make sure you have the [Faktory server](https://github.com/contribsys/faktory/#installation) installed.
-
-Next, install this gem:
 
     gem install faktory_worker_ruby
 

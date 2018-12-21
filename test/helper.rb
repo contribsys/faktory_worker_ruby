@@ -1,3 +1,4 @@
+$TESTING = true
 require 'minitest/pride'
 require 'minitest/autorun'
 
