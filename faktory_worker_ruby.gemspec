@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.test_files    = []
   gem.version       = Faktory::VERSION
-  gem.required_ruby_version = ">= 2.2.2"
+  gem.required_ruby_version = ">= 2.3.0"
 
   gem.add_dependency                  'connection_pool', '~> 2.2', ">= 2.2.1"
   gem.add_development_dependency      'activejob', '>= 5.1.5'

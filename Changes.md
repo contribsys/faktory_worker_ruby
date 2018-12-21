@@ -1,5 +1,10 @@
 # Changes
 
+## 0.8.1
+
+- Fix breakage with non-ActiveJobs [#29]
+- Ruby 2.3+ is now required
+
 ## 0.8.0
 
 - Add `-l LABEL` argument for adding labels to a process [#27, jpwinans]
