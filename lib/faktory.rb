@@ -52,6 +52,7 @@ module Faktory
   #     config.worker_middleware do |chain|
   #       chain.add MyServerHook
   #     end
+  #     config.default_job_options = { retry: 3 }
   #   end
   def self.configure_worker
     yield self if worker?
@@ -61,7 +62,7 @@ module Faktory
   # Configuration for Faktory client, use like:
   #
   #   Faktory.configure_client do |config|
-  #     config.faktory = { :size => 1, :url => 'myhost:7419' }
+  #     config.default_job_options = { retry: 3 }
   #   end
   def self.configure_client
     yield self unless worker?

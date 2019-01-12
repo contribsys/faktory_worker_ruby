@@ -7,7 +7,7 @@ module Faktory
       def create(options={})
         size = Faktory.worker? ? (Faktory.options[:concurrency] + 2) : 5
         ConnectionPool.new(:timeout => options[:pool_timeout] || 1, :size => size) do
-          Faktory::Client.new
+          Faktory::Client.new(options)
         end
       end
     end
