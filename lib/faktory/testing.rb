@@ -94,9 +94,9 @@ module Faktory
       end
     end
 
-    def open
+    def open(*args)
       unless Faktory::Testing.enabled?
-        real_open
+        real_open(*args)
       end
     end
   end

@@ -36,10 +36,10 @@ module Faktory
     # MY_FAKTORY_URL=tcp://:somepass@my-server.example.com:7419
     #
     # Note above, the URL can contain the password for secure installations.
-    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false)
+    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false, timeout: 5.0)
       @debug = debug
       @location = URI(url)
-      open
+      open(timeout)
     end
 
     def close
@@ -129,9 +129,17 @@ module Faktory
       @location.scheme =~ /tls/
     end
 
-    def open
+    def open(timeout=5.0)
+      # this is the read/write timeout, not open.
+      secs = Integer(timeout)
+      usecs = Integer((timeout - secs) * 1_000_000)
+      optval = [secs, usecs].pack("l_2")
       if tls?
         sock = TCPSocket.new(@location.hostname, @location.port)
+        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, optval)
+        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDTIMEO, optval)
+
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
         ctx.ssl_version = :TLSv1_2
@@ -143,6 +151,8 @@ module Faktory
       else
         @sock = TCPSocket.new(@location.hostname, @location.port)
         @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, optval)
+        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDTIMEO, optval)
       end
 
       payload = {
