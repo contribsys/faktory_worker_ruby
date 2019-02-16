@@ -86,7 +86,7 @@ module Faktory
         command("FAIL", JSON.dump({ message: ex.message[0...1000],
                           errtype: ex.class.name,
                           jid: jid,
-                          backtrace: ex.backtrace}))
+                          backtrace: ex.backtrace}).squish)
         ok!
       end
     end
@@ -186,7 +186,7 @@ module Faktory
         end
       end
 
-      command("HELLO", JSON.dump(payload))
+      command("HELLO", JSON.dump(payload).squish)
       ok!
     end
 
