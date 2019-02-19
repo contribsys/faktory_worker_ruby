@@ -11,6 +11,8 @@ module Faktory
   class Client
     @@random_process_wid = ""
 
+    DEFAULT_TIMEOUT = 5.0
+
     HASHER = proc do |iter, pwd, salt|
       sha = Digest::SHA256.new
       hashing = pwd + salt
@@ -36,10 +38,12 @@ module Faktory
     # MY_FAKTORY_URL=tcp://:somepass@my-server.example.com:7419
     #
     # Note above, the URL can contain the password for secure installations.
-    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false, timeout: 5.0)
+    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false, timeout: DEFAULT_TIMEOUT)
       @debug = debug
       @location = URI(url)
-      open(timeout)
+      @timeout = timeout
+
+      open(@timeout)
     end
 
     def close
@@ -129,7 +133,7 @@ module Faktory
       @location.scheme =~ /tls/
     end
 
-    def open(timeout=5.0)
+    def open(timeout = DEFAULT_TIMEOUT)
       # this is the read/write timeout, not open.
       secs = Integer(timeout)
       usecs = Integer((timeout - secs) * 1_000_000)
@@ -204,7 +208,7 @@ module Faktory
       rescue Errno::EPIPE, Errno::ECONNRESET
         if retryable
           retryable = false
-          open
+          open(@timeout)
           retry
         else
           raise
