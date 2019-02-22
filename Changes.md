@@ -1,5 +1,9 @@
 # Changes
 
+## HEAD
+
+- Initial support for the MUTATE command.
+
 ## 0.8.1
 
 - Fix breakage with non-ActiveJobs [#29]
