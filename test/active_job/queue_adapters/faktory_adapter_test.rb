@@ -1,6 +1,9 @@
 require 'helper'
 require 'active_job/queue_adapters/faktory_adapter'
 
+# quiet a lot of AJ noise
+ActiveJob::Base.logger = Logger.new(nil)
+
 class FaktoryAdapterTest < LiveTest
   describe 'ActiveJob adapter' do
 

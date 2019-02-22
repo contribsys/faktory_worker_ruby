@@ -194,7 +194,6 @@ module Faktory
       ok!
     end
 
-
     def command(*args)
       cmd = args.join(" ")
       @sock.puts(cmd)
@@ -203,6 +202,13 @@ module Faktory
 
     def transaction
       retryable = true
+
+      # When using Faktory::Testing, you can get a client which does not actually
+      # have an underlying socket.  Now if you disable testing and try to use that
+      # client, it will crash without a socket.  This open() handles that case to
+      # transparently open a socket.
+      open(@timeout) if !@sock
+
       begin
         yield
       rescue Errno::EPIPE, Errno::ECONNRESET
