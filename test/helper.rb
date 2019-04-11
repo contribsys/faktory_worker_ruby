@@ -15,3 +15,10 @@ require 'minitest/hooks/test'
 class LiveTest < Minitest::Test
   include Minitest::Hooks
 end
+
+def pro_only
+  (@desc ||= Faktory.server_pool.with do |c|
+    data = c.info
+    data["server"]["description"]
+  end).index("Pro")
+end
