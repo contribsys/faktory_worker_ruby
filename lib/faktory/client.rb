@@ -5,9 +5,15 @@ require 'digest'
 require 'securerandom'
 
 module Faktory
-  class CommandError < StandardError;end
-  class ParseError < StandardError;end
+  class BaseError < StandardError; end
+  class CommandError < BaseError; end
+  class ParseError < BaseError; end
 
+  # Faktory::Client provides a low-level connection to a Faktory server
+  # and APIs which map to Faktory commands.
+  #
+  # Most APIs will return `true` if the operation succeeded or raise a
+  # Faktory::BaseError if there was an unexpected error.
   class Client
     @@random_process_wid = ""
 
@@ -57,23 +63,28 @@ module Faktory
     def flush
       transaction do
         command "FLUSH"
-        ok!
+        ok
       end
     end
 
+
+    # Push a hash corresponding to a job payload to Faktory.
+    # Hash must contain "jid", "jobtype" and "args" elements at minimum.
+    # Returned value will either be the JID String if successful OR
+    # a symbol corresponding to an error.
     def push(job)
       transaction do
         command "PUSH", JSON.generate(job)
-        ok!
-        job["jid"]
+        ok(job["jid"])
       end
     end
 
+    # Returns either a job hash or falsy.
     def fetch(*queues)
       job = nil
       transaction do
         command("FETCH", *queues)
-        job = result
+        job = result!
       end
       JSON.parse(job) if job
     end
@@ -81,7 +92,7 @@ module Faktory
     def ack(jid)
       transaction do
         command("ACK", %Q[{"jid":"#{jid}"}])
-        ok!
+        ok
       end
     end
 
@@ -91,7 +102,7 @@ module Faktory
                           errtype: ex.class.name,
                           jid: jid,
                           backtrace: ex.backtrace}))
-        ok!
+        ok
       end
     end
 
@@ -104,7 +115,7 @@ module Faktory
     def beat
       transaction do
         command("BEAT", %Q[{"wid":"#{@@random_process_wid}"}])
-        str = result
+        str = result!
         if str == "OK"
           str
         else
@@ -117,7 +128,7 @@ module Faktory
     def info
       transaction do
         command("INFO")
-        str = result
+        str = result!
         JSON.parse(str) if str
       end
     end
@@ -191,7 +202,7 @@ module Faktory
       end
 
       command("HELLO", JSON.dump(payload))
-      ok!
+      ok
     end
 
     def command(*args)
@@ -238,7 +249,16 @@ module Faktory
         line = @sock.gets # read extra linefeeds
         data
       elsif chr == '-'
-        raise CommandError, line[1..-1]
+        # Server can respond with:
+        #
+        # -ERR Something unexpected
+        # We raise a CommandError
+        #
+        # -NOTUNIQUE Job not unique
+        # We return ["NOTUNIQUE", "Job not unique"]
+        err = line[1..-1].split(" ", 2)
+        raise CommandError, err[1] if err[0] == "ERR"
+        err
       else
         # this is bad, indicates we need to reset the socket
         # and start fresh
@@ -246,10 +266,16 @@ module Faktory
       end
     end
 
-    def ok!
+    def ok(retval=true)
       resp = result
-      raise CommandError, resp if resp != "OK"
-      true
+      return retval if resp == "OK"
+      return resp[0].to_sym
+    end
+
+    def result!
+      resp = result
+      raise CommandError, resp[0] if !resp.is_a?(String)
+      resp
     end
 
     # FAKTORY_PROVIDER=MY_FAKTORY_URL

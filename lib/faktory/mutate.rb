@@ -75,7 +75,7 @@ module Faktory
 
       transaction do
         command("MUTATE", JSON.dump(payload))
-        ok!
+        ok
       end
     end
 

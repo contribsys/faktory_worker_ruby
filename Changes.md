@@ -2,6 +2,7 @@
 
 ## HEAD
 
+- Refactor Faktory::Client error handling for faktory#208
 - Initial support for the MUTATE command.
 
 ## 0.8.1
