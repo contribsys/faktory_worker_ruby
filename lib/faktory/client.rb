@@ -274,6 +274,7 @@ module Faktory
 
     def result!
       resp = result
+      return nil if resp == nil
       raise CommandError, resp[0] if !resp.is_a?(String)
       resp
     end
