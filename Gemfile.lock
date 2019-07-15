@@ -38,6 +38,3 @@ DEPENDENCIES
   minitest (~> 5)
   minitest-hooks
   rake (~> 12)
-
-BUNDLED WITH
-   2.0.1
