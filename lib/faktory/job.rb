@@ -20,12 +20,19 @@ module Faktory
   # Note that perform_async is a class method, perform is an instance method.
   module Job
     attr_accessor :jid
+    attr_accessor :bid
 
     def self.included(base)
       raise ArgumentError, "You cannot include Faktory::Job in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
 
       base.extend(ClassMethods)
       base.faktory_class_attribute :faktory_options_hash
+    end
+
+    def batch
+      if bid
+        @batch ||= Faktory::Batch.new(bid)
+      end
     end
 
     def logger

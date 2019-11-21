@@ -1,6 +1,6 @@
 require 'helper'
 
-class ClientFaktory < Minitest::Test
+class ClientTest < Minitest::Test
   def teardown
     # Ensure that these tests aren't dependent on run order
     ENV["FAKTORY_PROVIDER"] = nil

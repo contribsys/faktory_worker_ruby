@@ -165,3 +165,4 @@ module Faktory
 end
 
 require 'faktory/rails' if defined?(::Rails::Engine)
+require 'faktory/batch'

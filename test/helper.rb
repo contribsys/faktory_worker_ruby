@@ -17,8 +17,16 @@ class LiveTest < Minitest::Test
 end
 
 def pro_only
+  @desc ||= Faktory.server_pool.with do |c|
+    data = c.info
+    data["server"]["description"]
+  end
+  @desc.index("Pro") || @desc.index("Enterprise")
+end
+
+def ent_only
   (@desc ||= Faktory.server_pool.with do |c|
     data = c.info
     data["server"]["description"]
-  end).index("Pro")
+  end).index("Enterprise")
 end

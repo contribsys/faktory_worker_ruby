@@ -67,6 +67,50 @@ module Faktory
       end
     end
 
+    def create_batch(batch, &block)
+      bid = transaction do
+        command "BATCH NEW", Faktory.dump_json(batch.to_h)
+        result!
+      end
+      batch.instance_variable_set(:@bid, bid)
+
+      old = Thread.current["faktory_batch"]
+      Thread.current["faktory_batch"] = batch
+      begin
+        # any jobs pushed in this block will implicitly have
+        # their `bid` attribute set so they are associated
+        # with the current batch.
+        yield batch
+      ensure
+        Thread.current[:faktory_batch] = old
+      end
+      transaction do
+        command "BATCH COMMIT", bid
+        ok
+      end
+      bid
+    end
+
+    def reopen_batch(b)
+      transaction do
+        command "BATCH OPEN", b.bid
+        ok
+      end
+      old = Thread.current[:faktory_batch]
+      Thread.current[:faktory_batch] = b
+      begin
+        # any jobs pushed in this block will implicitly have
+        # their `bid` attribute set so they are associated
+        # with the current batch.
+        yield b
+      ensure
+        Thread.current[:faktory_batch] = old
+      end
+      transaction do
+        command "BATCH COMMIT", b.bid
+        ok
+      end
+    end
 
     # Push a hash corresponding to a job payload to Faktory.
     # Hash must contain "jid", "jobtype" and "args" elements at minimum.
