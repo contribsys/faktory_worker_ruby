@@ -74,7 +74,7 @@ module Faktory
     # a symbol corresponding to an error.
     def push(job)
       transaction do
-        command "PUSH", JSON.generate(job)
+        command "PUSH", Faktory.dump_json(job)
         ok(job["jid"])
       end
     end
@@ -98,7 +98,7 @@ module Faktory
 
     def fail(jid, ex)
       transaction do
-        command("FAIL", JSON.dump({ message: ex.message[0...1000],
+        command("FAIL", Faktory.dump_json({ message: ex.message[0...1000],
                           errtype: ex.class.name,
                           jid: jid,
                           backtrace: ex.backtrace}))
@@ -119,7 +119,7 @@ module Faktory
         if str == "OK"
           str
         else
-          hash = JSON.parse(str)
+          hash = Faktory.load_json(str)
           hash["state"]
         end
       end
@@ -129,7 +129,7 @@ module Faktory
       transaction do
         command("INFO")
         str = result!
-        JSON.parse(str) if str
+        Faktory.load_json(str) if str
       end
     end
 
@@ -201,7 +201,7 @@ module Faktory
         end
       end
 
-      command("HELLO", JSON.dump(payload))
+      command("HELLO", Faktory.dump_json(payload))
       ok
     end
 
