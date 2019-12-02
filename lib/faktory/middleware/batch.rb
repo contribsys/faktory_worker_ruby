@@ -8,7 +8,7 @@ module Faktory::Middleware::Batch
       b = Thread.current["faktory_batch"]
       if b
         payload["custom"] ||= {}
-        payload["custom"]['bid'] = b.bid
+        payload["custom"]["bid"] = b.bid
       end
       yield
     end

@@ -16,7 +16,7 @@ class LiveTest < Minitest::Test
   include Minitest::Hooks
 end
 
-def pro_only
+def pro?
   @desc ||= Faktory.server_pool.with do |c|
     data = c.info
     data["server"]["description"]
@@ -24,7 +24,15 @@ def pro_only
   @desc.index("Pro") || @desc.index("Enterprise")
 end
 
+def pro_only
+  yield if pro?
+end
+
 def ent_only
+  yield if ent?
+end
+
+def ent?
   (@desc ||= Faktory.server_pool.with do |c|
     data = c.info
     data["server"]["description"]

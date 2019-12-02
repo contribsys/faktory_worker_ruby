@@ -11,6 +11,10 @@ module Faktory
   # * The "success" callback is fired when all jobs in the batch have succeeded. This
   #   might never be fired if a job continues to error until it runs out of retries.
   #
+  # **Please note that batches are only available in Faktory Enterprise.** This is
+  # the client-side code required to implement batches, it won't work without
+  # the server-side component.
+  #
   # Simple example:
   #
   #   b = Faktory::Batch.new
@@ -113,8 +117,8 @@ module Faktory
       hash = {}
       hash["parent_bid"] = parent_bid if parent_bid
       hash["description"] = description if description
-      hash["success"] = @success if @success
-      hash["complete"] = @complete if @complete
+      hash["success"] = @success if defined?(@success)
+      hash["complete"] = @complete if defined?(@complete)
       hash
     end
 
@@ -123,14 +127,22 @@ module Faktory
     def to_callback(val)
       case val
       when String
-        { jobtype: val }
+        basic_job.merge({ "jobtype" => val })
       when Class
-        { jobtype: val }
+        basic_job.merge({ "jobtype" => val })
       when Hash
-        val
+        basic_job.merge(val)
       else
         raise ArgumentError, "Unknown callback #{val}"
       end
+    end
+
+    def basic_job
+      {
+        "jid"   => SecureRandom.hex(12),
+        "args"  => [],
+        "queue" => "default",
+      }
     end
   end
 end
