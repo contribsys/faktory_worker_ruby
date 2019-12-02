@@ -24,6 +24,8 @@ class BatchTest < Minitest::Test
   end
 
   def test_basic_definition
+    skip "requires Faktory Enterprise" unless ent?
+
     b = Faktory::Batch.new
     refute b.bid
     b.success = FooJob.to_s
@@ -47,6 +49,7 @@ class BatchTest < Minitest::Test
   end
 
   def test_nested_definition
+    skip "requires Faktory Enterprise" unless ent?
     b = Faktory::Batch.new
     refute b.bid
 
