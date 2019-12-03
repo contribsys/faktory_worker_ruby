@@ -91,6 +91,13 @@ module Faktory
       bid
     end
 
+    def batch_status(bid)
+      transaction do
+        command "BATCH STATUS", bid
+        Faktory.load_json result!
+      end
+    end
+
     def reopen_batch(b)
       transaction do
         command "BATCH OPEN", b.bid

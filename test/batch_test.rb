@@ -73,6 +73,17 @@ class BatchTest < Minitest::Test
     assert pbid
     assert cbid
 
+    st = Faktory::BatchStatus.new(pbid)
+    assert_equal 1, st.total
+    assert_equal 1, st.pending
+    refute st.parent_bid
+
+    st = Faktory::BatchStatus.new(cbid)
+    assert_equal 1, st.total
+    assert_equal 1, st.pending
+    assert st.parent_bid
+
+
     # verify and execute the batch's job
     job = pop("default")
     assert job

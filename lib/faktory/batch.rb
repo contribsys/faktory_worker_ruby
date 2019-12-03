@@ -145,4 +145,34 @@ module Faktory
       }
     end
   end
+
+  class BatchStatus
+    def initialize(bid)
+      @bid = bid
+    end
+
+    def hash
+      @hash ||= Faktory.server{|c| c.batch_status(@bid) }
+    end
+
+    def created_at
+      hash["created_at"]
+    end
+
+    def description
+      hash["description"]
+    end
+
+    def parent_bid
+      hash["parent_bid"]
+    end
+
+    def total
+      hash["total"]
+    end
+
+    def pending
+      hash["pending"]
+    end
+  end
 end
