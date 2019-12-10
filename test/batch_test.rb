@@ -95,6 +95,19 @@ class BatchTest < Minitest::Test
     assert job
     assert_equal BatchJob.to_s, job["jobtype"]
     assert_equal cbid, job.dig("custom", "bid")
+
+    # reopen batch and add another job dynamically
+    cbid = job.dig("custom", "bid")
+    b = Faktory::Batch.new(cbid)
+    b.jobs do
+      BatchJob.perform_async
+    end
+    ack job
+
+    job = pop("default")
+    assert job
+    assert_equal BatchJob.to_s, job["jobtype"]
+    assert_equal cbid, job.dig("custom", "bid")
     ack job
 
     job = pop("default")
