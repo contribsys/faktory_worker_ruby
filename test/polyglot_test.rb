@@ -13,14 +13,7 @@ class PolyglotTest < LiveTest
     end
 
     it 'perform_async' do
-      Faktory::Job.perform_async('someFunc')
-      assert_equal 1, Faktory::Queues['default'].size
-
-      job = Faktory::Queues['default'].last
-      assert_equal 'someFunc', job['jobtype']
-      assert_equal [], job['args']
-
-      Faktory::Job.perform_async('someFunc', ['some', 'args'], queue: 'some_q')
+      Faktory::Job.set(queue: 'some_q', jobtype: 'someFunc').perform_async('some', 'args')
       assert_equal 1, Faktory::Queues['some_q'].size
 
       job = Faktory::Queues['some_q'].last
@@ -29,16 +22,7 @@ class PolyglotTest < LiveTest
     end
 
     it 'perform_in' do
-      Faktory::Job.perform_in(10, 'someFunc')
-      assert_equal 1, Faktory::Queues['default'].size
-
-      job = Faktory::Queues['default'].last
-      assert_equal 'someFunc', job['jobtype']
-      assert_equal [], job['args']
-      assert_in_delta Time.now.to_f, Time.parse(job['at']).to_f, 10.1
-
-
-      Faktory::Job.perform_in(10, 'someFunc', ['some', 'args'], queue: 'some_q')
+      Faktory::Job.set(queue: 'some_q', jobtype: 'someFunc').perform_in(10, 'some', 'args')
       assert_equal 1, Faktory::Queues['some_q'].size
 
       job = Faktory::Queues['some_q'].first
