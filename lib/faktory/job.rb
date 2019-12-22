@@ -29,6 +29,52 @@ module Faktory
       base.faktory_class_attribute :faktory_options_hash
     end
 
+    class << self
+      # Low level helper to enqueue a job with any jobtype
+      # +args+ must be an array of arguments
+      #
+      #   Faktory::Job.perform_async('someFunc', ["arg1"], queue: 'some_queue')
+      #
+      def perform_async(jobtype, args = [], faktory_options = Faktory.default_job_options)
+        client_push({'jobtype'.freeze => jobtype, 'args'.freeze => args}, faktory_options)
+      end
+
+      # Low level helper to enqueue a job with any jobtype
+      # +interval+ must be a timestamp, numeric or something that acts
+      #   numeric (like an activesupport time interval).
+      # +args+ must be an array of arguments
+      #
+      #   Faktory::Job.perform_in(12.minute, 'someFunc', ["arg1"], queue: 'some_queue')
+      #
+      def perform_in(interval, jobtype, args = [], faktory_options = Faktory.default_job_options)
+        int = interval.to_f
+        now = Time.now.to_f
+        ts = (int < 1_000_000_000 ? now + int : int)
+        item = {'jobtype'.freeze => jobtype, 'args'.freeze => args}
+        item['at'.freeze] = Time.at(ts).utc.to_datetime.rfc3339(9) if ts > now
+
+        client_push(item, faktory_options)
+      end
+      alias_method :perform_at, :perform_in
+
+      def client_push(item, faktory_options = Faktory.default_job_options) # :nodoc:
+        pool = Thread.current[:faktory_via_pool] || faktory_options['pool'.freeze] || Faktory.server_pool
+        item = faktory_options.merge(item)
+        # stringify
+        item.keys.each do |key|
+          item[key.to_s] = item.delete(key)
+        end
+        item["jid"] ||= SecureRandom.hex(12)
+        item["queue"] ||= "default"
+
+        Faktory.client_middleware.invoke(item, pool) do
+          pool.with do |c|
+            c.push(item)
+          end
+        end
+      end
+    end
+
     def batch
       if bid
         @batch ||= Faktory::Batch.new(bid)
@@ -75,21 +121,19 @@ module Faktory
       end
 
       def perform_async(*args)
-        client_push('jobtype'.freeze => self, 'args'.freeze => args)
+        Faktory::Job.perform_async(self, args, get_faktory_options)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
-        int = interval.to_f
-        now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
-        item = { 'jobtype'.freeze => self, 'args'.freeze => args }
-
-        item['at'] = Time.at(ts).utc.to_datetime.rfc3339(9) if ts > now
-        client_push(item)
+        Faktory::Job.perform_in(interval, self, args, get_faktory_options)
       end
       alias_method :perform_at, :perform_in
+
+      def client_push(item) # :nodoc:
+        Faktory::Job.client_push(item, get_faktory_options)
+      end
 
       ##
       # Allows customization of Faktory features for this type of Job.
@@ -107,23 +151,6 @@ module Faktory
 
       def get_faktory_options # :nodoc:
         self.faktory_options_hash ||= Faktory.default_job_options
-      end
-
-      def client_push(item) # :nodoc:
-        pool = Thread.current[:faktory_via_pool] || get_faktory_options['pool'.freeze] || Faktory.server_pool
-        item = get_faktory_options.merge(item)
-        # stringify
-        item.keys.each do |key|
-          item[key.to_s] = item.delete(key)
-        end
-        item["jid"] ||= SecureRandom.hex(12)
-        item["queue"] ||= "default"
-
-        Faktory.client_middleware.invoke(item, pool) do
-          pool.with do |c|
-            c.push(item)
-          end
-        end
       end
 
       def faktory_class_attribute(*attrs)
