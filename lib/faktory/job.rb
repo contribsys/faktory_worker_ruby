@@ -29,25 +29,23 @@ module Faktory
       base.faktory_class_attribute :faktory_options_hash
     end
 
-    class << self
-      def set(options)
-        Setter.new(options)
+    def self.set(options)
+      Setter.new(options)
+    end
+
+    def self.client_push(item) # :nodoc:
+      # stringify
+      item.keys.each do |key|
+        item[key.to_s] = item.delete(key)
       end
+      item["jid"] ||= SecureRandom.hex(12)
+      item["queue"] ||= "default"
 
-      def client_push(item, pool = nil) # :nodoc:
-        # stringify
-        item.keys.each do |key|
-          item[key.to_s] = item.delete(key)
-        end
-        item["jid"] ||= SecureRandom.hex(12)
-        item["queue"] ||= "default"
+      pool ||= Thread.current[:faktory_via_pool] || item.delete('pool') || Faktory.server_pool
 
-        pool ||= Thread.current[:faktory_via_pool] || item.delete('pool') || Faktory.server_pool
-
-        Faktory.client_middleware.invoke(item, pool) do
-          pool.with do |c|
-            c.push(item)
-          end
+      Faktory.client_middleware.invoke(item, pool) do
+        pool.with do |c|
+          c.push(item)
         end
       end
     end
