@@ -33,23 +33,6 @@ module Faktory
       Setter.new(options)
     end
 
-    def self.client_push(item) # :nodoc:
-      # stringify
-      item.keys.each do |key|
-        item[key.to_s] = item.delete(key)
-      end
-      item["jid"] ||= SecureRandom.hex(12)
-      item["queue"] ||= "default"
-
-      pool ||= Thread.current[:faktory_via_pool] || item.delete('pool') || Faktory.server_pool
-
-      Faktory.client_middleware.invoke(item, pool) do
-        pool.with do |c|
-          c.push(item)
-        end
-      end
-    end
-
     def batch
       if bid
         @batch ||= Faktory::Batch.new(bid)
@@ -70,7 +53,7 @@ module Faktory
       end
 
       def perform_async(*args)
-        Faktory::Job.client_push(@opts.merge('args'.freeze => args))
+        client_push(@opts.merge('args'.freeze => args))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -86,9 +69,27 @@ module Faktory
         # Optimization to enqueue something now that is scheduled to go out now or in the past
         item.delete('at'.freeze) if ts <= now
 
-        Faktory::Job.client_push(item)
+        client_push(item)
       end
       alias_method :perform_at, :perform_in
+
+      def client_push(item) # :nodoc:
+        # stringify
+        item.keys.each do |key|
+          item[key.to_s] = item.delete(key)
+        end
+        item["jid"] ||= SecureRandom.hex(12)
+        item["queue"] ||= "default"
+
+        pool = Thread.current[:faktory_via_pool] || item["pool"] || Faktory.server_pool
+        item.delete("pool")
+
+        Faktory.client_middleware.invoke(item, pool) do
+          pool.with do |c|
+            c.push(item)
+          end
+        end
+      end
     end
 
     module ClassMethods
