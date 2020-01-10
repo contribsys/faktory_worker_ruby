@@ -31,8 +31,14 @@ class TestingInlineTest < LiveTest
       Faktory::Testing.inline! do
         assert InlineJob.perform_async(true)
 
+        assert Faktory::Job.set(jobtype: InlineJob).perform_async(true)
+
         assert_raises InlineError do
           InlineJob.perform_async(false)
+        end
+
+        assert_raises InlineError do
+          Faktory::Job.set(jobtype: InlineJob).perform_async(false)
         end
       end
     end
@@ -54,6 +60,14 @@ class TestingInlineTest < LiveTest
             "jobtype" => InlineJob,
             "args" => [false]
           })
+        end
+      end
+    end
+
+    it 'raises error for non-existing jobtype class' do
+      Faktory::Testing.inline! do
+        assert_raises NameError do
+          Faktory::Job.set(jobtype: 'someFunc').perform_async
         end
       end
     end

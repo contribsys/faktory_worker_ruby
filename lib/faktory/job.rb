@@ -29,6 +29,10 @@ module Faktory
       base.faktory_class_attribute :faktory_options_hash
     end
 
+    def self.set(options)
+      Setter.new(options)
+    end
+
     def batch
       if bid
         @batch ||= Faktory::Batch.new(bid)
@@ -49,7 +53,7 @@ module Faktory
       end
 
       def perform_async(*args)
-        @opts['jobtype'.freeze].client_push(@opts.merge!('args'.freeze => args))
+        client_push(@opts.merge('args'.freeze => args))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -60,12 +64,32 @@ module Faktory
         ts = (int < 1_000_000_000 ? now + int : int)
         at = Time.at(ts).utc.to_datetime.rfc3339(9)
 
-        @opts.merge! 'args'.freeze => args, 'at'.freeze => at
+        item = @opts.merge('args'.freeze => args, 'at'.freeze => at)
+
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        @opts.delete('at'.freeze) if ts <= now
-        @opts['jobtype'.freeze].client_push(@opts)
+        item.delete('at'.freeze) if ts <= now
+
+        client_push(item)
       end
       alias_method :perform_at, :perform_in
+
+      def client_push(item) # :nodoc:
+        # stringify
+        item.keys.each do |key|
+          item[key.to_s] = item.delete(key)
+        end
+        item["jid"] ||= SecureRandom.hex(12)
+        item["queue"] ||= "default"
+
+        pool = Thread.current[:faktory_via_pool] || item["pool"] || Faktory.server_pool
+        item.delete("pool")
+
+        Faktory.client_middleware.invoke(item, pool) do
+          pool.with do |c|
+            c.push(item)
+          end
+        end
+      end
     end
 
     module ClassMethods
@@ -75,19 +99,13 @@ module Faktory
       end
 
       def perform_async(*args)
-        client_push('jobtype'.freeze => self, 'args'.freeze => args)
+        set(get_faktory_options).perform_async(*args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
-        int = interval.to_f
-        now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
-        item = { 'jobtype'.freeze => self, 'args'.freeze => args }
-
-        item['at'] = Time.at(ts).utc.to_datetime.rfc3339(9) if ts > now
-        client_push(item)
+        set(get_faktory_options).perform_in(interval, *args)
       end
       alias_method :perform_at, :perform_in
 
@@ -107,23 +125,6 @@ module Faktory
 
       def get_faktory_options # :nodoc:
         self.faktory_options_hash ||= Faktory.default_job_options
-      end
-
-      def client_push(item) # :nodoc:
-        pool = Thread.current[:faktory_via_pool] || get_faktory_options['pool'.freeze] || Faktory.server_pool
-        item = get_faktory_options.merge(item)
-        # stringify
-        item.keys.each do |key|
-          item[key.to_s] = item.delete(key)
-        end
-        item["jid"] ||= SecureRandom.hex(12)
-        item["queue"] ||= "default"
-
-        Faktory.client_middleware.invoke(item, pool) do
-          pool.with do |c|
-            c.push(item)
-          end
-        end
       end
 
       def faktory_class_attribute(*attrs)
