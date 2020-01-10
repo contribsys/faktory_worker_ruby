@@ -148,10 +148,11 @@ module Faktory
           end
         end
         work.acknowledge
-      rescue Faktory::Shutdown
-        # Had to force kill this job because it didn't finish
-        # within the timeout.  Don't acknowledge the work since
-        # we didn't properly finish it.
+      rescue Faktory::Shutdown => shut
+        # Had to force kill this job because it didn't finish within
+        # the timeout.  Fail it so we can release any locks server-side
+        # and immediately restart it.
+        work.fail(shut)
       rescue Exception => ex
         handle_exception(ex, { :context => "Job raised exception", :job => work.job })
         work.fail(ex)
