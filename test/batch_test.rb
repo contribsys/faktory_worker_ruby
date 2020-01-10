@@ -1,4 +1,4 @@
-require 'helper'
+require_relative './helper'
 
 class BatchTest < Minitest::Test
   def setup
@@ -50,6 +50,7 @@ class BatchTest < Minitest::Test
 
   def test_nested_definition
     skip "requires Faktory Enterprise" unless ent?
+
     b = Faktory::Batch.new
     refute b.bid
 
@@ -82,7 +83,6 @@ class BatchTest < Minitest::Test
     assert_equal 1, st.total
     assert_equal 1, st.pending
     assert st.parent_bid
-
 
     # verify and execute the batch's job
     job = pop("default")
