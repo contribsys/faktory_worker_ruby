@@ -62,7 +62,6 @@ module Faktory
 
     def stop(deadline)
       quiet
-
       fire_event(:shutdown, true)
 
       # some of the shutdown events can be async,
