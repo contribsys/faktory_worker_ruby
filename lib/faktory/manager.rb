@@ -49,9 +49,6 @@ module Faktory
     end
 
     def quiet
-      # Notify the server that this process is going quiet
-      Faktory.server {|c| c.beat(:quiet) }
-
       return if @done
       @done = true
 
@@ -66,8 +63,6 @@ module Faktory
     def stop(deadline)
       quiet
 
-      # Notify the server that this process is terminating
-      Faktory.server {|c| c.beat(:terminate) }
       fire_event(:shutdown, true)
 
       # some of the shutdown events can be async,

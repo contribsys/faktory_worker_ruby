@@ -11,7 +11,7 @@ module Faktory
     def initialize(options)
       merged_options = Faktory.options.merge(options)
       @manager = Faktory::Manager.new(merged_options)
-      @done = false
+      @current_state = nil
       @options = merged_options
     end
 
@@ -22,7 +22,7 @@ module Faktory
 
     # Stops this instance from processing any more jobs,
     def quiet
-      @done = true
+      @current_state = 'quiet'
       @manager.quiet
     end
 
@@ -32,13 +32,17 @@ module Faktory
     def stop
       deadline = Time.now + @options[:timeout]
 
-      @done = true
+      @current_state = 'terminate'
       @manager.quiet
       @manager.stop(deadline)
     end
 
     def stopping?
-      @done
+      @current_state == 'terminate'
+    end
+
+    def quiet?
+      @current_state == 'quiet'
     end
 
     PROCTITLES = []
@@ -50,12 +54,13 @@ module Faktory
       PROCTITLES << proc { title }
       PROCTITLES << proc { "[#{Processor.busy_count} of #{@options[:concurrency]} busy]" }
       PROCTITLES << proc { "stopping" if stopping? }
+      PROCTITLES << proc { "quiet" if quiet? }
 
       loop do
         $0 = PROCTITLES.map {|p| p.call }.join(" ")
 
         begin
-          result = Faktory.server {|c| c.beat }
+          result = Faktory.server {|c| c.beat(@current_state) }
           case result
           when "OK"
             # all good
