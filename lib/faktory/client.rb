@@ -161,17 +161,17 @@ module Faktory
     # worker process is still alive.
     #
     # You can pass in the current_state of the process, for example during shutdown
-    # quiet and/or terminate can be supplied. 
+    # quiet and/or terminate can be supplied.
     #
     # Return a string signal to process, legal values are "quiet" or "terminate".
     # The quiet signal is informative: the server won't allow this process to FETCH
     # any more jobs anyways.
     def beat(current_state = nil)
       transaction do
-        if current_state.present?
-          command("BEAT", %Q[{"wid":"#{@@random_process_wid}", "current_state":"#{current_state}"}])
-        else
+        if current_state.nil?
           command("BEAT", %Q[{"wid":"#{@@random_process_wid}"}])
+        else
+          command("BEAT", %Q[{"wid":"#{@@random_process_wid}", "current_state":"#{current_state}"}])
         end
 
         str = result!
@@ -359,4 +359,3 @@ module Faktory
 
   end
 end
-
