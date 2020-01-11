@@ -168,7 +168,12 @@ module Faktory
     # any more jobs anyways.
     def beat(current_state = nil)
       transaction do
-        command("BEAT", %Q[{"wid":"#{@@random_process_wid}", "current_state":"#{current_state}"}])
+        if current_state.present?
+          command("BEAT", %Q[{"wid":"#{@@random_process_wid}", "current_state":"#{current_state}"}])
+        else
+          command("BEAT", %Q[{"wid":"#{@@random_process_wid}"}])
+        end
+
         str = result!
         if str == "OK"
           str
