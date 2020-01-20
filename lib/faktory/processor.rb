@@ -133,6 +133,7 @@ module Faktory
             klass  = constantize(payload['jobtype'.freeze])
             jobinst = klass.new
             jobinst.jid = payload['jid'.freeze]
+            jobinst.bid = payload['custom'.freeze].to_h['bid'.freeze]
             yield jobinst
           end
         end
