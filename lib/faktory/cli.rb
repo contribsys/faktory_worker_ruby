@@ -8,6 +8,11 @@ require 'optparse'
 require 'erb'
 require 'fileutils'
 
+module Faktory
+  class CLI
+  end
+end
+
 require 'faktory'
 require 'faktory/util'
 
