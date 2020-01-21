@@ -88,6 +88,7 @@ module Faktory
           @@busy_count = @@busy_count + 1
         end
         begin
+          @job = work.job
           process(work)
         ensure
           @@busy_lock.synchronize do

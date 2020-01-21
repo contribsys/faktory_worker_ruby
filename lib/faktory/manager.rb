@@ -123,6 +123,9 @@ module Faktory
       cleanup.each do |processor|
         processor.kill
       end
+      cleanup.each do |processor|
+        processor.thread.join(1)
+      end
     end
 
   end
