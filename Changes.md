@@ -2,10 +2,10 @@
 
 ## HEAD
 
-- Refactor Faktory::Client error handling for faktory#208
+- Support for Faktory Enterprise, job batches and job tracking
 - Support for the MUTATE command.
-- Support for Faktory Enterprise and job batches
 - Notify Faktory when a worker process is going quiet so that the UI shows this
+- Refactor Faktory::Client error handling for faktory#208
 
 ## 0.8.1
 
