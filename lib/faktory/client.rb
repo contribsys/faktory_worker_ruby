@@ -119,6 +119,22 @@ module Faktory
       end
     end
 
+    def get_track(jid)
+      transaction do
+        command "TRACK GET", jid
+        hashstr = result!
+        JSON.parse(hashstr)
+      end
+    end
+
+    # hash must include a 'jid' element
+    def set_track(hash)
+      transaction do
+        command("TRACK SET", Faktory.dump_json(hash))
+        ok
+      end
+    end
+
     # Push a hash corresponding to a job payload to Faktory.
     # Hash must contain "jid", "jobtype" and "args" elements at minimum.
     # Returned value will either be the JID String if successful OR

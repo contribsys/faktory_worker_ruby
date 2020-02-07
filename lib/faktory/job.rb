@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require 'faktory/tracking'
+
 module Faktory
 
   ##
@@ -21,6 +23,8 @@ module Faktory
   module Job
     attr_accessor :jid
     attr_accessor :bid
+
+    include Faktory::Trackable
 
     def self.included(base)
       raise ArgumentError, "You cannot include Faktory::Job in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
