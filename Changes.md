@@ -2,6 +2,7 @@
 
 ## HEAD
 
+- Ruby 2.5+ is now required
 - Support for Faktory Enterprise, job batches and job tracking
 - Support for the MUTATE command.
 - Notify Faktory when a worker process is going quiet so that the UI shows this
