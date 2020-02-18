@@ -43,34 +43,6 @@ module Faktory
       end
     end
 
-    # Send job status updates to Faktory for monitoring.
-    # This requires Faktory Enterprise's Job Tracking feature.
-    # Optionally use `reserve_until` to dynamically extend the job's
-    # reservation if you have a long-running job.
-    #
-    #    progress(10, "Working...")
-    #    progress(20, "Clearing caches...")
-    #    progress(40, "Updating user...", reserve_until: 20.minutes.from_now)
-    def progress(percent, desc, reserve_until:nil)
-      hash = {
-          jid: jid,
-          percent: percent.to_i,
-          desc: desc,
-        }
-      if reserve_until
-        ts = reserve_until.to_i
-        # gracefully handle case where the user passed "20.minutes" without "from_now"
-        reserve = if ts < 86400
-               Time.now + ts
-             else
-               Time.at(ts)
-             end
-        hash[:reserve_until] = reserve.utc.iso8601
-      end
-
-      Faktory.server {|c| c.set_track(hash) }
-    end
-
     def logger
       Faktory.logger
     end
