@@ -20,5 +20,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency      'activejob', '>= 5.1.5'
   gem.add_development_dependency      'minitest', '~> 5'
   gem.add_development_dependency      'minitest-hooks'
-  gem.add_development_dependency      'rake', '~> 12'
+  gem.add_development_dependency      'rake', '~> 13'
 end
