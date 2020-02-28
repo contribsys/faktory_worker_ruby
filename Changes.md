@@ -1,6 +1,6 @@
 # Changes
 
-## HEAD
+## 1.0.0
 
 - Ruby 2.5+ is now required
 - Support for Faktory Enterprise, job batches and job tracking
