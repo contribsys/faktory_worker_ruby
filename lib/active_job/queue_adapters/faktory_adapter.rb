@@ -32,8 +32,12 @@ module ActiveJob
           hash["retry"] = opts.delete("retry") if opts.has_key?("retry")
           hash["custom"] = opts.merge(hash["custom"])
         end
-        # Faktory::Client does not support symbols as keys
-        Faktory::Client.new.push(hash)
+        pool = Thread.current[:faktory_via_pool] || Faktory.server_pool
+        Faktory.client_middleware.invoke(hash, pool) do
+          pool.with do |c|
+            c.push(hash)
+          end
+        end
       end
 
       class JobWrapper #:nodoc:

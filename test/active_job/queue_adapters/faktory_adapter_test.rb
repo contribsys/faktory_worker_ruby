@@ -1,5 +1,6 @@
 require 'helper'
 require 'active_job/queue_adapters/faktory_adapter'
+require 'faktory/middleware/i18n'
 
 # quiet a lot of AJ noise
 ActiveJob::Base.logger = Logger.new(nil)
@@ -66,5 +67,11 @@ class FaktoryAdapterTest < LiveTest
       assert_equal 6, TestJob.count
     end
 
+    it 'executes client middlewares on push' do
+      TestJob.perform_later(123)
+
+      job = ActiveJob::QueueAdapters::FaktoryAdapter::JobWrapper.jobs.last
+      assert_equal "en", job["custom"]["locale"]
+    end
   end
 end
