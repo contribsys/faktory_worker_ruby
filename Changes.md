@@ -1,5 +1,9 @@
 # Changes
 
+## HEAD
+
+- Run client middleware before pushing a job to Faktory [#48]
+
 ## 1.0.0
 
 - Ruby 2.5+ is now required
