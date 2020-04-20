@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    faktory_worker_ruby (1.0.0)
+    faktory_worker_ruby (1.0.1)
       connection_pool (~> 2.2, >= 2.2.2)
 
 GEM
@@ -40,9 +40,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activejob (>= 5.1.5)
+  activejob (>= 5.2.0)
   faktory_worker_ruby!
   minitest (~> 5)
   minitest-hooks
-  rake (~> 12)
+  rake
   simplecov
