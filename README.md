@@ -34,8 +34,10 @@ server part is [here](https://github.com/contribsys/faktory/)
 
 ## Requirements
 
-* Ruby 2.3 or higher
-* Faktory 0.9 or higher [Installation](https://github.com/contribsys/faktory/wiki/Installation)
+* Ruby 2.5 or higher
+* Faktory 1.2 or higher [Installation](https://github.com/contribsys/faktory/wiki/Installation)
+
+Optionally, Rails 5.2+ for ActiveJob.
 
 ## Installation
 
@@ -95,4 +97,4 @@ PRs to improve this are very welcome).
 
 ## Author
 
-Mike Perham, @mperham, mike @ contribsys.com
+Mike Perham, @getajobmike, mike @ contribsys.com
