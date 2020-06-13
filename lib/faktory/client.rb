@@ -232,7 +232,7 @@ module Faktory
 
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
-        ctx.ssl_version = :TLSv1_2
+        ctx.min_version = OpenSSL::SSL::TLS1_2_VERSION
 
         @sock = OpenSSL::SSL::SSLSocket.new(sock, ctx).tap do |socket|
           socket.sync_close = true
