@@ -3,6 +3,8 @@ require 'json'
 require 'uri'
 require 'digest'
 require 'securerandom'
+require 'timeout'
+require 'faktory/io'
 
 module Faktory
   class BaseError < StandardError; end
@@ -15,6 +17,9 @@ module Faktory
   # Most APIs will return `true` if the operation succeeded or raise a
   # Faktory::BaseError if there was an unexpected error.
   class Client
+    # provides gets() and read() that respect a read timeout
+    include Faktory::ReadTimeout
+
     @@random_process_wid = ""
 
     DEFAULT_TIMEOUT = 5.0
@@ -45,6 +50,7 @@ module Faktory
     #
     # Note above, the URL can contain the password for secure installations.
     def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false, timeout: DEFAULT_TIMEOUT)
+      super
       @debug = debug
       @location = URI(url)
       @timeout = timeout
@@ -220,15 +226,9 @@ module Faktory
     end
 
     def open(timeout = DEFAULT_TIMEOUT)
-      # this is the read/write timeout, not open.
-      secs = Integer(timeout)
-      usecs = Integer((timeout - secs) * 1_000_000)
-      optval = [secs, usecs].pack("l_2")
       if tls?
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
-        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, optval)
-        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDTIMEO, optval)
 
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
@@ -241,8 +241,6 @@ module Faktory
       else
         @sock = TCPSocket.new(@location.hostname, @location.port)
         @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, optval)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDTIMEO, optval)
       end
 
       payload = {
@@ -311,7 +309,7 @@ module Faktory
     # I love pragmatic, simple protocols.  Thanks antirez!
     # https://redis.io/topics/protocol
     def result
-      line = @sock.gets
+      line = gets
       debug "< #{line}" if @debug
       raise Errno::ECONNRESET, "No response" unless line
       chr = line[0]
@@ -320,8 +318,8 @@ module Faktory
       elsif chr == '$'
         count = line[1..-1].strip.to_i
         return nil if count == -1
-        data = @sock.read(count) if count > 0
-        line = @sock.gets # read extra linefeeds
+        data = read(count) if count > 0
+        line = gets # read extra linefeeds
         data
       elsif chr == '-'
         # Server can respond with:
