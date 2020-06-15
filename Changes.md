@@ -3,6 +3,7 @@
 ## HEAD
 
 - Run client middleware before pushing a job to Faktory [#48]
+- Implement read timeouts for Faktory::Client for faktory#297
 
 ## 1.0.0
 
