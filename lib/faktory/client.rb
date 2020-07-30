@@ -295,9 +295,12 @@ module Faktory
 
       begin
         yield
-      rescue Errno::EPIPE, Errno::ECONNRESET
+      rescue SystemCallError, SocketError, TimeoutError
         if retryable
           retryable = false
+
+          @sock.close rescue nil
+          @sock = nil
           open(@timeout)
           retry
         else
