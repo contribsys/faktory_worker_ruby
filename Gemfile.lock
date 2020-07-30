@@ -7,26 +7,26 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (6.0.2.2)
-      activesupport (= 6.0.2.2)
+    activejob (6.0.3.2)
+      activesupport (= 6.0.3.2)
       globalid (>= 0.3.6)
-    activesupport (6.0.2.2)
+    activesupport (6.0.3.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-      zeitwerk (~> 2.2)
+      zeitwerk (~> 2.2, >= 2.2.2)
     concurrent-ruby (1.1.6)
-    connection_pool (2.2.2)
+    connection_pool (2.2.3)
     docile (1.3.2)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
-    i18n (1.8.2)
+    i18n (1.8.5)
       concurrent-ruby (~> 1.0)
-    minitest (5.14.0)
+    minitest (5.14.1)
     minitest-hooks (1.5.0)
       minitest (> 5.3)
-    rake (12.3.3)
+    rake (13.0.1)
     simplecov (0.18.5)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -34,7 +34,7 @@ GEM
     thread_safe (0.3.6)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
-    zeitwerk (2.3.0)
+    zeitwerk (2.4.0)
 
 PLATFORMS
   ruby
@@ -46,3 +46,6 @@ DEPENDENCIES
   minitest-hooks
   rake
   simplecov
+
+BUNDLED WITH
+   2.1.4
