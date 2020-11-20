@@ -1,3 +1,4 @@
+require "io/wait"
 
 # this is the necessary magic to get a line-oriented protocol to
 # respect a read timeout. unfortunately Ruby sockets do not provide any
@@ -36,9 +37,9 @@ module Faktory
       loop do
         result = @sock.read_nonblock(nbytes, exception: false)
         if result == :wait_readable
-          raise Faktory::TimeoutError unless IO.select([@sock], nil, nil, @timeout)
+          raise Faktory::TimeoutError unless @sock.wait_readable(@timeout)
         elsif result == :wait_writable
-          raise Faktory::TimeoutError unless IO.select(nil, [@sock], nil, @timeout)
+          raise Faktory::TimeoutError unless @sock.wait_writeable(@timeout)
         elsif result == nil
           raise Errno::ECONNRESET
         else
