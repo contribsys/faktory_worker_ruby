@@ -23,8 +23,18 @@ module Faktory
         if ::Rails::VERSION::MAJOR < 5
           raise "Your current version of Rails, #{::Rails::VERSION::STRING}, is not supported"
         end
-        
+
         Faktory.options[:reloader] = Faktory::Rails::Reloader.new
+      end
+
+      begin
+        # https://github.com/rails/rails/pull/41248
+        if defined?(::Mail::SMTP)
+          ::Mail::SMTP::DEFAULTS[:read_timeout] ||= 5
+          ::Mail::SMTP::DEFAULTS[:open_timeout] ||= 5
+        end
+      rescue => ex
+        # ignore
       end
     end
 
