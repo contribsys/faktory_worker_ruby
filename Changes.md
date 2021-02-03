@@ -1,6 +1,6 @@
 # Changes
 
-## HEAD
+## 1.0.1
 
 - Run client middleware before pushing a job to Faktory [#48]
 - Implement read timeouts for Faktory::Client for faktory#297
