@@ -80,9 +80,9 @@ module Faktory
       end
       batch.instance_variable_set(:@bid, bid)
 
-      old = Thread.current["faktory_batch"]
-      Thread.current["faktory_batch"] = batch
+      old = Thread.current[:faktory_batch]
       begin
+        Thread.current[:faktory_batch] = batch
         # any jobs pushed in this block will implicitly have
         # their `bid` attribute set so they are associated
         # with the current batch.
@@ -110,8 +110,8 @@ module Faktory
         ok
       end
       old = Thread.current[:faktory_batch]
-      Thread.current[:faktory_batch] = b
       begin
+        Thread.current[:faktory_batch] = b
         # any jobs pushed in this block will implicitly have
         # their `bid` attribute set so they are associated
         # with the current batch.

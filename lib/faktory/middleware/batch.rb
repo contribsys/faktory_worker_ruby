@@ -5,7 +5,7 @@
 module Faktory::Middleware::Batch
   class Client
     def call(payload, pool)
-      b = Thread.current["faktory_batch"]
+      b = Thread.current[:faktory_batch]
       if b
         payload["custom"] ||= {}
         payload["custom"]["bid"] = b.bid

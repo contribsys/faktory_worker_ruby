@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.2
+
+- Fix "batch not open" errors
+
 ## 1.0.1
 
 - Run client middleware before pushing a job to Faktory [#48]
