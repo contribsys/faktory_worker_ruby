@@ -99,7 +99,7 @@ module Faktory
     module ClassMethods
 
       def set(options)
-        Setter.new(options.merge!('jobtype'.freeze => self))
+        Setter.new(options.merge('jobtype'.freeze => self))
       end
 
       def perform_async(*args)
