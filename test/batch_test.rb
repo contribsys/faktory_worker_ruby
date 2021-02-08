@@ -11,6 +11,13 @@ class BatchTest < Minitest::Test
     end
   end
 
+  class CustomBatchJob
+    include Faktory::Job
+    faktory_options custom: { track: 1 }
+    def perform(*)
+    end
+  end
+
   class FooJob
     include Faktory::Job
     def perform(*)
@@ -121,6 +128,17 @@ class BatchTest < Minitest::Test
     assert_equal FooJob.to_s, job["jobtype"]
     refute job.dig("custom", "bid")
     ack job
+  end
+
+  def test_batch_job_with_custom_faktory_options
+    skip "requires Faktory Enterprise" unless ent?
+
+    b = Faktory::Batch.new
+    b.success = FooJob.to_s
+    b.jobs do
+      CustomBatchJob.perform_async
+    end
+    refute CustomBatchJob.get_faktory_options["custom"]["bid"]
   end
 
   def ack(job)
