@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.3
+
+- Fix corruption in `custom` hash elements [#55]
+
 ## 1.0.2
 
 - Fix "batch not open" errors
