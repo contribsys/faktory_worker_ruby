@@ -8,13 +8,7 @@ module Faktory::Middleware::Batch
       b = Thread.current[:faktory_batch]
       if b
         payload["custom"] ||= {}
-        #
-        # Note:
-        # When `custom: { .. }` is set in a Job's faktory_options
-        # then `payload["custom"]` will hold a reference here.
-        # So let's use merge to create a copy of the custom hash here.
-        #
-        payload["custom"] = payload["custom"].merge("bid" => b.bid)
+        payload["custom"]["bid"] = b.bid
       end
       yield
     end

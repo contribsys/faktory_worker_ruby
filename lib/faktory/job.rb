@@ -88,6 +88,11 @@ module Faktory
         pool = Thread.current[:faktory_via_pool] || item["pool"] || Faktory.server_pool
         item.delete("pool")
 
+        # the payload hash is shallow copied by `merge` calls BUT we don't deep clone
+        # the 'custom' child hash which can be problematic if we mutate it within middleware.
+        # Proactively dup it first.
+        item["custom"] = item["custom"].dup if item["custom"]
+
         Faktory.client_middleware.invoke(item, pool) do
           pool.with do |c|
             c.push(item)
