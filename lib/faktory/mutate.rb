@@ -1,5 +1,11 @@
 require 'faktory/client'
 
+##
+#
+# Faktory's MUTATE API allows you to scan the sorted sets
+# within Redis (retries, scheduled, dead) and take action
+# (delete, enqueue, kill) on entries.
+#
 # require 'faktory/mutate'
 # cl = Faktory::Client.new
 # cl.discard(Faktory::RETRIES) do |filter|
