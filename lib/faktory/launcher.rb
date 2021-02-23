@@ -60,7 +60,7 @@ module Faktory
         $0 = PROCTITLES.map {|p| p.call }.join(" ")
 
         begin
-          result = Faktory.server {|c| c.beat(@current_state) }
+          result = Faktory.server {|c| c.beat(@current_state, "rss_kb" => memory_usage(::Process.pid)) }
           case result
           when "OK"
             # all good
@@ -77,6 +77,27 @@ module Faktory
         sleep 10
       end
     end
+
+    MEMORY_GRABBER = case RUBY_PLATFORM
+    when /linux/
+      ->(pid) {
+        IO.readlines("/proc/#{$$}/status").each do |line|
+          next unless line.start_with?("VmRSS:")
+          break line.split[1].to_i
+        end
+      }
+    when /darwin|bsd/
+      ->(pid) {
+        `ps -o pid,rss -p #{pid}`.lines.last.split.last.to_i
+      }
+    else
+      ->(pid) { 0 }
+    end
+
+    def memory_usage(pid)
+      MEMORY_GRABBER.call(pid)
+    end
+
 
   end
 end

@@ -188,13 +188,11 @@ module Faktory
     # Return a string signal to process, legal values are "quiet" or "terminate".
     # The quiet signal is informative: the server won't allow this process to FETCH
     # any more jobs anyways.
-    def beat(current_state = nil)
+    def beat(current_state = nil, hash)
       transaction do
-        if current_state.nil?
-          command("BEAT", %Q[{"wid":"#{@@random_process_wid}"}])
-        else
-          command("BEAT", %Q[{"wid":"#{@@random_process_wid}", "current_state":"#{current_state}"}])
-        end
+        hash["wid"] = @@random_process_wid
+        hash["current_state"] = current_state if current_state
+        command("BEAT", Faktory.dump_json(hash))
 
         str = result!
         if str == "OK"
