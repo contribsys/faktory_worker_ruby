@@ -212,7 +212,7 @@ module Faktory
       if !File.exist?(options[:require]) ||
          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
-        logger.info "  Please point Faktory to a Rails 5 application or a Ruby file  "
+        logger.info "  Please point Faktory to a Rails application or a Ruby file  "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
         logger.info "=================================================================="
         logger.info @parser
