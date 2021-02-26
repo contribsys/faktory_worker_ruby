@@ -1,5 +1,10 @@
 # Changes
 
+## 1.1.0
+
+- Send process RSS to Faktory for /Busy page
+- Implement QUEUE PAUSE/RESUME client commands
+
 ## 1.0.3
 
 - Fix corruption in `custom` hash elements [#55]

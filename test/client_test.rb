@@ -37,4 +37,10 @@ class ClientTest < Minitest::Test
     client = Faktory::Client.new(url: 'tcp://localhost:7419')
     assert_equal URI("tcp://localhost:7419"), client.instance_variable_get(:@location)
   end
+
+  def test_queue_pause_and_resume
+    client = Faktory::Client.new
+    assert client.pause_queues ["foo", "bar"]
+    assert client.resume_queues "*"
+  end
 end

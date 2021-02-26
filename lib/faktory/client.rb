@@ -141,6 +141,22 @@ module Faktory
       end
     end
 
+    def pause_queues(queues)
+      qs = Array(queues)
+      transaction do
+        command "QUEUE PAUSE", qs.join(" ")
+        ok
+      end
+    end
+
+    def resume_queues(queues)
+      qs = Array(queues)
+      transaction do
+        command "QUEUE RESUME", qs.join(" ")
+        ok
+      end
+    end
+
     # Push a hash corresponding to a job payload to Faktory.
     # Hash must contain "jid", "jobtype" and "args" elements at minimum.
     # Returned value will either be the JID String if successful OR
