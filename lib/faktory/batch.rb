@@ -98,7 +98,7 @@ module Faktory
 
     def complete=(val)
       raise "Batch cannot be modified once created" if bid
-      @success = to_callback(val)
+      @complete = to_callback(val)
     end
 
     def jobs(&block)
