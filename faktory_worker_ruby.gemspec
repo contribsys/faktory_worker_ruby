@@ -16,6 +16,14 @@ Gem::Specification.new do |gem|
   gem.version       = Faktory::VERSION
   gem.required_ruby_version = ">= 2.5.0"
 
+  gem.metadata = {
+    "homepage_uri" => "https://contribsys.com/faktory",
+    "bug_tracker_uri" => "https://github.com/contribsys/faktory_worker_ruby/issues",
+    "documentation_uri" => "https://github.com/contribsys/faktory_worker_ruby/wiki",
+    "changelog_uri" => "https://github.com/contribsys/faktory_worker_ruby/blob/master/Changes.md",
+    "source_code_uri" => "https://github.com/contribsys/faktory_worker_ruby",
+  }
+
   gem.add_dependency                  'connection_pool', '~> 2.2', ">= 2.2.2"
   gem.add_development_dependency      'activejob', '>= 5.2.0'
   gem.add_development_dependency      'minitest', '~> 5'

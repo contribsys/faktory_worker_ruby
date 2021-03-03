@@ -4,6 +4,7 @@
 
 - Send process RSS to Faktory for /Busy page
 - Implement QUEUE PAUSE/RESUME client commands
+- Fix broken `complete` callback with batches
 
 ## 1.0.3
 
