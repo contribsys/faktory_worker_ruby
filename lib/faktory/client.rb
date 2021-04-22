@@ -262,6 +262,7 @@ module Faktory
         "hostname": Socket.gethostname,
         "pid": $$,
         "labels": Faktory.options[:labels] || ["ruby-#{RUBY_VERSION}"],
+        "username": @location.user,
         "v": 2,
       }
 
