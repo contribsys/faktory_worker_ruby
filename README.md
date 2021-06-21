@@ -1,6 +1,6 @@
 # faktory\_worker\_ruby
 
-![travis](https://travis-ci.org/contribsys/faktory_worker_ruby.svg?branch=master)
+![CI status](https://github.com/contribsys/faktory_worker_ruby/actions/workflows/ci.yml/badge.svg)
 
 Faktory\_worker\_ruby is the official Ruby client and worker process for the
 Faktory background job server.  It is similar to [Sidekiq](http://sidekiq.org).
