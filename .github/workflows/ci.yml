@@ -13,12 +13,12 @@ jobs:
       matrix:
         ruby: [2.5, 2.6, 2.7, '3.0']
     runs-on: ubuntu-latest
-    container:
-      image: contribsys/faktory:latest
-      ports:
-          - 7419:7419
-          - 7420:7420
-
+    services:
+      faktory:
+        image: contribsys/faktory:latest
+        ports:
+            - 7419:7419
+            - 7420:7420
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
