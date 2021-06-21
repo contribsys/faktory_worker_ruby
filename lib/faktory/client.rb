@@ -241,6 +241,7 @@ module Faktory
 
     def open(timeout = DEFAULT_TIMEOUT)
       if tls?
+        require 'openssl'
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
