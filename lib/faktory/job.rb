@@ -57,7 +57,8 @@ module Faktory
       end
 
       def set(opts)
-        self.class.new(@opts.merge(opts))
+        @opts.merge!(opts)
+        self
       end
 
       def perform_async(*args)
