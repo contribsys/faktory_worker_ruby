@@ -29,5 +29,15 @@ class SetTest < LiveTest
       assert_equal 2, job['reserve_for']
       assert_equal 3, job['custom']['unique_for']
     end
+
+    it 'overrides faktory_options on the instance' do
+      SomeJob.set(queue: 'some_q').set(queue: 'other_q').perform_async('example-arg')
+      assert_equal 1, Faktory::Queues['other_q'].size
+
+      job = Faktory::Queues['other_q'].last
+      assert_equal 1, job['retry']
+      assert_equal 2, job['reserve_for']
+      assert_equal 3, job['custom']['unique_for']
+    end
   end
 end

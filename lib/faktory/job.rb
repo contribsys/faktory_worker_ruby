@@ -56,6 +56,10 @@ module Faktory
         @opts = opts
       end
 
+      def set(opts)
+        self.class.new(@opts.merge(opts))
+      end
+
       def perform_async(*args)
         client_push(@opts.merge('args'.freeze => args))
       end
