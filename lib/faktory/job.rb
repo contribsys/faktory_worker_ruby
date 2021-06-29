@@ -57,7 +57,7 @@ module Faktory
       end
 
       def set(opts)
-        @opts.merge!(opts)
+        @opts = Util.deep_merge(@opts, opts)
         self
       end
 
@@ -109,7 +109,7 @@ module Faktory
     module ClassMethods
 
       def set(options)
-        Setter.new(get_faktory_options.merge(options.merge('jobtype'.freeze => self)))
+        Setter.new(Util.deep_merge(get_faktory_options, options, 'jobtype'.freeze => self))
       end
 
       def perform_async(*args)
@@ -198,5 +198,23 @@ module Faktory
       end
 
     end
+
+    module Util
+      def deep_merge(*hashes)
+        initial = hashes.shift.transform_keys(&:to_s)
+        hashes.reduce(initial) do |acc, other_hash|
+          other_hash.transform_keys!(&:to_s)
+          acc.merge(other_hash) do |_key, this_val, other_val|
+            if this_val.is_a?(Hash) && other_val.is_a?(Hash)
+              deep_merge(this_val, other_val)
+            else
+              other_val
+            end
+          end
+        end
+      end
+      module_function :deep_merge
+    end
+
   end
 end
