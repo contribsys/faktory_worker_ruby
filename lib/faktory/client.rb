@@ -240,22 +240,29 @@ module Faktory
     end
 
     def open(timeout = DEFAULT_TIMEOUT)
-      if tls?
-        require 'openssl'
-        sock = TCPSocket.new(@location.hostname, @location.port)
-        sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+      begin
+        @sock = Timeout.timeout(timeout) do
+          if tls?
+            require 'openssl'
+            sock = TCPSocket.new(@location.hostname, @location.port)
+            sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
-        ctx.min_version = OpenSSL::SSL::TLS1_2_VERSION
+            ctx = OpenSSL::SSL::SSLContext.new
+            ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
+            ctx.min_version = OpenSSL::SSL::TLS1_2_VERSION
 
-        @sock = OpenSSL::SSL::SSLSocket.new(sock, ctx).tap do |socket|
-          socket.sync_close = true
-          socket.connect
+            @sock = OpenSSL::SSL::SSLSocket.new(sock, ctx).tap do |socket|
+              socket.sync_close = true
+              socket.connect
+            end
+          else
+            @sock = TCPSocket.new(@location.hostname, @location.port)
+            @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+          end
+          @sock
         end
-      else
-        @sock = TCPSocket.new(@location.hostname, @location.port)
-        @sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+      rescue Timeout::Error
+        raise Faktory::TimeoutError, "Failed to connect to #{@location} after #{timeout} seconds"
       end
 
       payload = {
