@@ -1,5 +1,9 @@
 # Changes
 
+## 1.1.1
+
+- Fix OpenSSL error [#59]
+
 ## 1.1.0
 
 - Send process RSS to Faktory for /Busy page
