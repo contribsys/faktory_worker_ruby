@@ -1,20 +1,20 @@
-# encoding: utf-8
 # frozen_string_literal: true
+
 $stdout.sync = true
 
-require 'yaml'
-require 'singleton'
-require 'optparse'
-require 'erb'
-require 'fileutils'
+require "yaml"
+require "singleton"
+require "optparse"
+require "erb"
+require "fileutils"
 
 module Faktory
   class CLI
   end
 end
 
-require 'faktory'
-require 'faktory/util'
+require "faktory"
+require "faktory/util"
 
 module Faktory
   class CLI
@@ -30,7 +30,7 @@ module Faktory
       @code = nil
     end
 
-    def parse(args=ARGV)
+    def parse(args = ARGV)
       @code = nil
 
       setup_options(args)
@@ -52,16 +52,14 @@ module Faktory
       print_banner
 
       self_read, self_write = IO.pipe
-      sigs = %w(INT TERM TTIN TSTP)
+      sigs = %w[INT TERM TTIN TSTP]
 
       sigs.each do |sig|
-        begin
-          trap sig do
-            self_write.puts(sig)
-          end
-        rescue ArgumentError
-          puts "Signal #{sig} not supported"
+        trap sig do
+          self_write.puts(sig)
         end
+      rescue ArgumentError
+        puts "Signal #{sig} not supported"
       end
 
       logger.info "Running in #{RUBY_DESCRIPTION}"
@@ -77,12 +75,12 @@ module Faktory
       # Starting here the process will now have multiple threads running.
       fire_event(:startup)
 
-      logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(', ')}" }
-      logger.debug { "Worker Middleware: #{Faktory.worker_middleware.map(&:klass).join(', ')}" }
+      logger.debug { "Client Middleware: #{Faktory.client_middleware.map(&:klass).join(", ")}" }
+      logger.debug { "Worker Middleware: #{Faktory.worker_middleware.map(&:klass).join(", ")}" }
 
-      logger.info 'Starting processing, hit Ctrl-C to stop' if $stdout.tty?
+      logger.info "Starting processing, hit Ctrl-C to stop" if $stdout.tty?
 
-      require 'faktory/launcher'
+      require "faktory/launcher"
       @launcher = Faktory::Launcher.new(options)
 
       begin
@@ -93,7 +91,7 @@ module Faktory
           handle_signal(signal)
         end
       rescue Interrupt
-        logger.info 'Shutting down'
+        logger.info "Shutting down"
         launcher.stop
         # Explicitly exit so busy Processor threads can't block
         # process shutdown.
@@ -103,7 +101,7 @@ module Faktory
     end
 
     def self.banner
-%q{
+      %q{
                     ,,,,
             ,,,,    |  |
             |  |    |  |
@@ -122,17 +120,17 @@ module Faktory
     def handle_signal(sig)
       Faktory.logger.debug "Got #{sig} signal"
       case sig
-      when 'INT'
+      when "INT"
         raise Interrupt
-      when 'TERM'
+      when "TERM"
         # Heroku sends TERM and then waits 30 seconds for process to exit.
         raise Interrupt
-      when 'TSTP'
+      when "TSTP"
         Faktory.logger.info "Received TSTP, no longer accepting new work"
         launcher.quiet
-      when 'TTIN'
+      when "TTIN"
         Thread.list.each do |thread|
-          Faktory.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['faktory_label']}"
+          Faktory.logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread["faktory_label"]}"
           if thread.backtrace
             Faktory.logger.warn thread.backtrace.join("\n")
           else
@@ -146,15 +144,15 @@ module Faktory
 
     def print_banner
       # Print logo and banner for development
-      if environment == 'development' && $stdout.tty?
-        puts "\e[#{31}m"
+      if environment == "development" && $stdout.tty?
+        puts "\e[31m"
         puts Faktory::CLI.banner
         puts "\e[0m"
       end
     end
 
     def set_environment(cli_env)
-      @environment = cli_env || ENV['RAILS_ENV'] || ENV['RACK_ENV'] || 'development'
+      @environment = cli_env || ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development"
     end
 
     alias_method :die, :exit
@@ -178,18 +176,18 @@ module Faktory
     end
 
     def boot_system
-      ENV['RACK_ENV'] = ENV['RAILS_ENV'] = environment
+      ENV["RACK_ENV"] = ENV["RAILS_ENV"] = environment
 
       raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
 
       if File.directory?(options[:require])
-        require 'rails'
-        require 'faktory/rails'
+        require "rails"
+        require "faktory/rails"
         require File.expand_path("#{options[:require]}/config/environment.rb")
         options[:tag] ||= default_tag
       else
         not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
-            "./#{options[:require]} or /path/to/#{options[:require]}"
+          "./#{options[:require]} or /path/to/#{options[:require]}"
 
         require(options[:require]) || raise(ArgumentError, not_required_message)
       end
@@ -199,7 +197,7 @@ module Faktory
       dir = ::Rails.root
       name = File.basename(dir)
       if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
-        if File.basename(prevdir) == 'releases'
+        if File.basename(prevdir) == "releases"
           return File.basename(File.dirname(prevdir))
         end
       end
@@ -207,10 +205,10 @@ module Faktory
     end
 
     def validate!
-      options[:queues] << 'default' if options[:queues].empty?
+      options[:queues] << "default" if options[:queues].empty?
 
       if !File.exist?(options[:require]) ||
-         (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
+          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
         logger.info "=================================================================="
         logger.info "  Please point Faktory to a Rails application or a Ruby file  "
         logger.info "  to load your worker classes with -r [DIR|FILE]."
@@ -228,19 +226,19 @@ module Faktory
       opts = {}
 
       @parser = OptionParser.new do |o|
-        o.on '-c', '--concurrency INT', "processor threads to use" do |arg|
+        o.on "-c", "--concurrency INT", "processor threads to use" do |arg|
           opts[:concurrency] = Integer(arg)
         end
 
-        o.on '-e', '--environment ENV', "Application environment" do |arg|
+        o.on "-e", "--environment ENV", "Application environment" do |arg|
           opts[:environment] = arg
         end
 
-        o.on '-g', '--tag TAG', "Process tag for procline" do |arg|
+        o.on "-g", "--tag TAG", "Process tag for procline" do |arg|
           opts[:tag] = arg
         end
 
-        o.on '-l', '--label LABEL', "Process label to use in Faktory UI" do |arg|
+        o.on "-l", "--label LABEL", "Process label to use in Faktory UI" do |arg|
           (opts[:labels] ||= []) << arg
         end
 
@@ -249,11 +247,11 @@ module Faktory
           parse_queue opts, queue, weight
         end
 
-        o.on '-r', '--require [PATH|DIR]', "Location of Rails application with workers or file to require" do |arg|
+        o.on "-r", "--require [PATH|DIR]", "Location of Rails application with workers or file to require" do |arg|
           opts[:require] = arg
         end
 
-        o.on '-t', '--timeout NUM', "Shutdown timeout" do |arg|
+        o.on "-t", "--timeout NUM", "Shutdown timeout" do |arg|
           opts[:timeout] = Integer(arg)
         end
 
@@ -261,11 +259,11 @@ module Faktory
           opts[:verbose] = arg
         end
 
-        o.on '-C', '--config PATH', "path to YAML config file" do |arg|
+        o.on "-C", "--config PATH", "path to YAML config file" do |arg|
           opts[:config_file] = arg
         end
 
-        o.on '-V', '--version', "Print version and exit" do |arg|
+        o.on "-V", "--version", "Print version and exit" do |arg|
           puts "Faktory #{Faktory::VERSION}"
           die(0)
         end
@@ -308,9 +306,9 @@ module Faktory
       queues_and_weights.each { |queue_and_weight| parse_queue(opts, *queue_and_weight) }
     end
 
-    def parse_queue(opts, q, weight=nil)
+    def parse_queue(opts, q, weight = nil)
       [weight.to_i, 1].max.times do
-       (opts[:queues] ||= []) << q
+        (opts[:queues] ||= []) << q
       end
       opts[:strict] = false if weight.to_i > 0
     end

@@ -87,7 +87,7 @@ module Faktory
     attr_reader :bid
     attr_accessor :description, :parent_bid
 
-    def initialize(bid=nil)
+    def initialize(bid = nil)
       @bid = bid
     end
 
@@ -127,9 +127,9 @@ module Faktory
     def to_callback(val)
       case val
       when String
-        basic_job.merge({ "jobtype" => val })
+        basic_job.merge({"jobtype" => val})
       when Class
-        basic_job.merge({ "jobtype" => val })
+        basic_job.merge({"jobtype" => val})
       when Hash
         basic_job.merge(val)
       else
@@ -139,9 +139,9 @@ module Faktory
 
     def basic_job
       {
-        "jid"   => SecureRandom.hex(12),
-        "args"  => [],
-        "queue" => "default",
+        "jid" => SecureRandom.hex(12),
+        "args" => [],
+        "queue" => "default"
       }
     end
   end
@@ -152,7 +152,7 @@ module Faktory
     end
 
     def hash
-      @hash ||= Faktory.server{|c| c.batch_status(@bid) }
+      @hash ||= Faktory.server { |c| c.batch_status(@bid) }
     end
 
     def created_at

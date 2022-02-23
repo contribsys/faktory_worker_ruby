@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require 'time'
-require 'logger'
-require 'fcntl'
+
+require "time"
+require "logger"
+require "fcntl"
 
 module Faktory
   module Logging
-
     class Pretty < Logger::Formatter
       SPACE = " "
 
@@ -29,8 +29,8 @@ module Faktory
     def self.job_hash_context(job_hash)
       # If we're using a wrapper class, like ActiveJob, use the "wrapped"
       # attribute to expose the underlying thing.
-      klass = job_hash.dig('custom', 'wrapped') || job_hash["jobtype"]
-      "#{klass} JID-#{job_hash['jid']}"
+      klass = job_hash.dig("custom", "wrapped") || job_hash["jobtype"]
+      "#{klass} JID-#{job_hash["jid"]}"
     end
 
     def self.with_job_hash_context(job_hash, &block)
@@ -62,7 +62,7 @@ module Faktory
     end
 
     def self.logger=(log)
-      @logger = (log ? log : Logger.new(File::NULL))
+      @logger = (log || Logger.new(File::NULL))
     end
 
     def logger

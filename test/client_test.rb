@@ -1,4 +1,4 @@
-require 'helper'
+require "helper"
 
 class ClientTest < Minitest::Test
   def teardown
@@ -34,7 +34,7 @@ class ClientTest < Minitest::Test
     ENV["FAKTORY_PROVIDER"] = "FAKTORY_URL"
     ENV["FAKTORY_URL"] = "tcp://127.0.0.1:7419"
 
-    client = Faktory::Client.new(url: 'tcp://localhost:7419')
+    client = Faktory::Client.new(url: "tcp://localhost:7419")
     assert_equal URI("tcp://localhost:7419"), client.instance_variable_get(:@location)
   end
 

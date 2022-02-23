@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # Simple middleware to save the current locale and restore it when the job executes.
 # Use it by requiring it in your initializer:
@@ -11,7 +12,7 @@ module Faktory::Middleware::I18n
   class Client
     def call(payload, pool)
       c = payload["custom"] ||= {}
-      c['locale'] ||= ::I18n.locale
+      c["locale"] ||= ::I18n.locale
       yield
     end
   end

@@ -1,5 +1,5 @@
-require 'helper'
-require 'faktory/processor'
+require "helper"
+require "faktory/processor"
 
 class TestProcessor < Minitest::Test
   class SomeJob
@@ -7,12 +7,13 @@ class TestProcessor < Minitest::Test
     def perform
     end
   end
+
   def test_process_job
     job = {
-      'jid' => '1234abc',
-      'jobtype' => SomeJob.to_s,
-      'queue' => 'default',
-      'args' => [],
+      "jid" => "1234abc",
+      "jobtype" => SomeJob.to_s,
+      "queue" => "default",
+      "args" => []
     }
     uow = UnitOfTestWork.new(job)
     p = Faktory::Processor.new(Faktory)
@@ -50,7 +51,7 @@ class TestProcessor < Minitest::Test
     end
 
     def jid
-      job['jid']
+      job["jid"]
     end
   end
 end

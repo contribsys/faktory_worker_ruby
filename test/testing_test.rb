@@ -1,24 +1,24 @@
-require 'helper'
+require "helper"
 
 class TestingTest < LiveTest
-  describe 'faktory testing' do
-    describe 'require/load faktory/testing.rb' do
+  describe "faktory testing" do
+    describe "require/load faktory/testing.rb" do
       before do
-        require 'faktory/testing'
+        require "faktory/testing"
       end
 
       after do
         Faktory::Testing.disable!
       end
 
-      it 'enables fake testing' do
+      it "enables fake testing" do
         Faktory::Testing.fake!
         assert Faktory::Testing.enabled?
         assert Faktory::Testing.fake?
         refute Faktory::Testing.inline?
       end
 
-      it 'enables fake testing in a block' do
+      it "enables fake testing in a block" do
         Faktory::Testing.disable!
         assert Faktory::Testing.disabled?
         refute Faktory::Testing.fake?
@@ -33,7 +33,7 @@ class TestingTest < LiveTest
         refute Faktory::Testing.fake?
       end
 
-      it 'enables inilne testing in a block' do
+      it "enables inilne testing in a block" do
         Faktory::Testing.disable!
         assert Faktory::Testing.disabled?
         refute Faktory::Testing.inline?
@@ -48,7 +48,7 @@ class TestingTest < LiveTest
         refute Faktory::Testing.inline?
       end
 
-      it 'disables testing in a block' do
+      it "disables testing in a block" do
         Faktory::Testing.fake!
         assert Faktory::Testing.fake?
 

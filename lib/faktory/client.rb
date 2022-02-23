@@ -1,14 +1,16 @@
-require 'socket'
-require 'json'
-require 'uri'
-require 'digest'
-require 'securerandom'
-require 'timeout'
-require 'faktory/io'
+require "socket"
+require "json"
+require "uri"
+require "digest"
+require "securerandom"
+require "timeout"
+require "faktory/io"
 
 module Faktory
   class BaseError < StandardError; end
+
   class CommandError < BaseError; end
+
   class ParseError < BaseError; end
 
   # Faktory::Client provides a low-level connection to a Faktory server
@@ -33,7 +35,6 @@ module Faktory
       Digest.hexencode(hashing)
     end
 
-
     # Called when booting the worker process to signal that this process
     # will consume jobs and send BEAT.
     def self.worker!
@@ -49,7 +50,7 @@ module Faktory
     # MY_FAKTORY_URL=tcp://:somepass@my-server.example.com:7419
     #
     # Note above, the URL can contain the password for secure installations.
-    def initialize(url: uri_from_env || 'tcp://localhost:7419', debug: false, timeout: DEFAULT_TIMEOUT)
+    def initialize(url: uri_from_env || "tcp://localhost:7419", debug: false, timeout: DEFAULT_TIMEOUT)
       super
       @debug = debug
       @location = URI(url)
@@ -180,14 +181,14 @@ module Faktory
 
     def ack(jid)
       transaction do
-        command("ACK", %Q[{"jid":"#{jid}"}])
+        command("ACK", %({"jid":"#{jid}"}))
         ok
       end
     end
 
     def fail(jid, ex)
       transaction do
-        command("FAIL", Faktory.dump_json({ message: ex.message[0...1000],
+        command("FAIL", Faktory.dump_json({message: ex.message[0...1000],
                           errtype: ex.class.name,
                           jid: jid,
                           backtrace: ex.backtrace}))
@@ -241,7 +242,7 @@ module Faktory
 
     def open(timeout = DEFAULT_TIMEOUT)
       if tls?
-        require 'openssl'
+        require "openssl"
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
@@ -259,12 +260,12 @@ module Faktory
       end
 
       payload = {
-        "wid": @@random_process_wid,
-        "hostname": Socket.gethostname,
-        "pid": $$,
-        "labels": Faktory.options[:labels] || ["ruby-#{RUBY_VERSION}"],
-        "username": @location.user,
-        "v": 2,
+        wid: @@random_process_wid,
+        hostname: Socket.gethostname,
+        pid: $$,
+        labels: Faktory.options[:labels] || ["ruby-#{RUBY_VERSION}"],
+        username: @location.user,
+        v: 2
       }
 
       hi = result
@@ -286,7 +287,7 @@ module Faktory
           iter = (hash["i"] || 1).to_i
           raise ArgumentError, "Invalid hashing" if iter < 1
 
-          payload["pwdhash"] = HASHER.(iter, pwd, salt)
+          payload["pwdhash"] = HASHER.call(iter, pwd, salt)
         end
       end
 
@@ -315,7 +316,11 @@ module Faktory
         if retryable
           retryable = false
 
-          @sock.close rescue nil
+          begin
+            @sock.close
+          rescue
+            nil
+          end
           @sock = nil
           open(@timeout)
           retry
@@ -332,15 +337,15 @@ module Faktory
       debug "< #{line}" if @debug
       raise Errno::ECONNRESET, "No response" unless line
       chr = line[0]
-      if chr == '+'
+      if chr == "+"
         line[1..-1].strip
-      elsif chr == '$'
+      elsif chr == "$"
         count = line[1..-1].strip.to_i
         return nil if count == -1
         data = read(count) if count > 0
         line = gets # read extra linefeeds
         data
-      elsif chr == '-'
+      elsif chr == "-"
         # Server can respond with:
         #
         # -ERR Something unexpected
@@ -358,15 +363,15 @@ module Faktory
       end
     end
 
-    def ok(retval=true)
+    def ok(retval = true)
       resp = result
       return retval if resp == "OK"
-      return resp[0].to_sym
+      resp[0].to_sym
     end
 
     def result!
       resp = result
-      return nil if resp == nil
+      return nil if resp.nil?
       raise CommandError, resp[0] if !resp.is_a?(String)
       resp
     end
@@ -374,21 +379,20 @@ module Faktory
     # FAKTORY_PROVIDER=MY_FAKTORY_URL
     # MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
     def uri_from_env
-      prov = ENV['FAKTORY_PROVIDER']
+      prov = ENV["FAKTORY_PROVIDER"]
       if prov
         raise(ArgumentError, <<-EOM) if prov.index(":")
   Invalid FAKTORY_PROVIDER '#{prov}', it should be the name of the ENV variable that contains the URL
       FAKTORY_PROVIDER=MY_FAKTORY_URL
       MY_FAKTORY_URL=tcp://:some-pass@some-hostname:7419
-  EOM
+        EOM
         val = ENV[prov]
         return URI(val) if val
       end
 
-      val = ENV['FAKTORY_URL']
+      val = ENV["FAKTORY_URL"]
       return URI(val) if val
       nil
     end
-
   end
 end

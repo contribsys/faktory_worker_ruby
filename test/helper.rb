@@ -1,12 +1,12 @@
 $TESTING = true
-require 'simplecov'
+require "simplecov"
 SimpleCov.start
 
-require 'minitest/pride'
-require 'minitest/autorun'
+require "minitest/pride"
+require "minitest/autorun"
 
-require 'faktory'
-require 'faktory/testing'
+require "faktory"
+require "faktory/testing"
 
 module I18n
   def self.locale
@@ -14,7 +14,7 @@ module I18n
   end
 end
 
-require 'minitest/hooks/test'
+require "minitest/hooks/test"
 class LiveTest < Minitest::Test
   include Minitest::Hooks
 end

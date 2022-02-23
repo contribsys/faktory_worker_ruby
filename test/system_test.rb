@@ -1,4 +1,4 @@
-require 'helper'
+require "helper"
 
 class SystemTest < LiveTest
   def around
@@ -6,7 +6,7 @@ class SystemTest < LiveTest
     # within the FWR test suite and the pool may or may not be useable for live tests
     # depending on the order of the execution of test cases.
     Faktory.instance_variable_set(:@pool, nil)
-    Faktory.server{|s| s.flush }
+    Faktory.server { |s| s.flush }
     super
   end
 
@@ -14,8 +14,8 @@ class SystemTest < LiveTest
     {
       jid: "1231278127839" + idx.to_s,
       queue: "default",
-      jobtype:  "SomeJob",
-      args:  [1, "string", 3],
+      jobtype: "SomeJob",
+      args: [1, "string", 3]
     }
   end
 
@@ -25,12 +25,12 @@ class SystemTest < LiveTest
       threads << Thread.new do
         client = Faktory::Client.new
 
-        #puts "Pushing"
+        # puts "Pushing"
         100.times do |idx|
-          client.push(randjob((ix*100)+idx))
+          client.push(randjob((ix * 100) + idx))
         end
 
-        #puts "Popping"
+        # puts "Popping"
         100.times do |idx|
           job = client.fetch("default")
           refute_nil job
@@ -40,7 +40,6 @@ class SystemTest < LiveTest
             client.ack(job["jid"])
           end
         end
-
       end
     end
 
@@ -56,18 +55,18 @@ class SystemTest < LiveTest
   end
 
   def test_job
-    require 'faktory/middleware/i18n'
+    require "faktory/middleware/i18n"
 
     jid = TestJob.perform_async(1, "bob")
     refute_nil jid
     assert_equal 24, jid.size
 
-    payload = Faktory.server {|c| c.fetch("custom") }
+    payload = Faktory.server { |c| c.fetch("custom") }
     assert_equal "en", payload.dig("custom", "locale")
   end
 
   def test_job_at
-    jid = TestJob.set("queue": 'another').perform_in(10, 1, "bob")
+    jid = TestJob.set(queue: "another").perform_in(10, 1, "bob")
     refute_nil jid
     assert_equal 24, jid.size
   end

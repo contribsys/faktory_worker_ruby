@@ -1,4 +1,4 @@
-require 'faktory/client'
+require "faktory/client"
 
 ##
 #
@@ -13,7 +13,6 @@ require 'faktory/client'
 #   filter.matching("*uid:12345*"))
 # end
 module Faktory
-
   # Valid targets
   RETRIES = "retries"
   SCHEDULED = "scheduled"
@@ -46,6 +45,7 @@ module Faktory
       def jids
         @hash[:jids] ||= []
       end
+
       def jids=(ary)
         @hash[:jids] = Array(ary)
       end
@@ -54,29 +54,29 @@ module Faktory
     def discard(target, &block)
       filter = Filter.new
       block.call(filter) if block
-      mutate('discard', target, filter)
+      mutate("discard", target, filter)
     end
 
     def kill(target, &block)
       filter = Filter.new
       block.call(filter) if block
-      mutate('kill', target, filter)
+      mutate("kill", target, filter)
     end
 
     def requeue(target, &block)
       filter = Filter.new
       block.call(filter) if block
-      mutate('requeue', target, filter)
+      mutate("requeue", target, filter)
     end
 
     def clear(target)
-      mutate('discard', target, nil)
+      mutate("discard", target, nil)
     end
 
     private
 
     def mutate(cmd, target, filter)
-      payload = {:cmd => cmd,:target => target}
+      payload = {cmd: cmd, target: target}
       payload[:filter] = filter.hash if filter && !filter.hash.empty?
 
       transaction do
@@ -84,7 +84,6 @@ module Faktory
         ok
       end
     end
-
   end
 end
 

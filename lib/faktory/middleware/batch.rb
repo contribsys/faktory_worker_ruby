@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # Simple middleware to save the current batch and restore it when the job executes.
 #

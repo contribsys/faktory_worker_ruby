@@ -1,10 +1,9 @@
-require 'helper'
+require "helper"
 
 class TrackingTest < Minitest::Test
-
   class TrackedJob
     include Faktory::Job
-    faktory_options custom: { track: 1 }
+    faktory_options custom: {track: 1}
     def perform(*)
     end
   end
@@ -12,9 +11,7 @@ class TrackingTest < Minitest::Test
   include Faktory::Trackable
 
   # trackable needs a JID
-  def jid
-    @jid
-  end
+  attr_reader :jid
 
   def test_job_tracking
     @jid = TrackedJob.perform_async(1)
@@ -36,7 +33,5 @@ class TrackingTest < Minitest::Test
 
       track_progress(15, "Working...", reserve_until: 1.minute.from_now)
     end
-
   end
 end
-

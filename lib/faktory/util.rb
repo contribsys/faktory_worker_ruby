@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'socket'
-require 'securerandom'
-require 'faktory/exception_handler'
+
+require "socket"
+require "securerandom"
+require "faktory/exception_handler"
 
 module Faktory
   ##
@@ -15,13 +16,13 @@ module Faktory
     def watchdog(last_words)
       yield
     rescue Exception => ex
-      handle_exception(ex, { context: last_words })
+      handle_exception(ex, {context: last_words})
       raise ex
     end
 
     def safe_thread(name, &block)
       Thread.new do
-        Thread.current['faktory_label'.freeze] = name
+        Thread.current["faktory_label"] = name
         watchdog(name, &block)
       end
     end
@@ -35,7 +36,7 @@ module Faktory
     end
 
     def hostname
-      ENV['DYNO'] || Socket.gethostname
+      ENV["DYNO"] || Socket.gethostname
     end
 
     def process_nonce
@@ -46,15 +47,13 @@ module Faktory
       @@identity ||= "#{hostname}:#{$$}:#{process_nonce}"
     end
 
-    def fire_event(event, reverse=false)
+    def fire_event(event, reverse = false)
       arr = Faktory.options[:lifecycle_events][event]
       arr.reverse! if reverse
       arr.each do |block|
-        begin
-          block.call
-        rescue => ex
-          handle_exception(ex, { context: "Exception during Faktory lifecycle event.", event: event })
-        end
+        block.call
+      rescue => ex
+        handle_exception(ex, {context: "Exception during Faktory lifecycle event.", event: event})
       end
       arr.clear
     end

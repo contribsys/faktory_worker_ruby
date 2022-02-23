@@ -1,24 +1,24 @@
-# encoding: utf-8
 # frozen_string_literal: true
-require 'faktory/version'
 
-require 'faktory/logging'
-require 'faktory/client'
-require 'faktory/middleware/chain'
-require 'faktory/job'
-require 'faktory/connection'
+require "faktory/version"
 
-require 'json'
+require "faktory/logging"
+require "faktory/client"
+require "faktory/middleware/chain"
+require "faktory/job"
+require "faktory/connection"
+
+require "json"
 
 module Faktory
-  NAME = 'Faktory'.freeze
-  LICENSE = 'See LICENSE and the LGPL-3.0 for licensing details.'
+  NAME = "Faktory"
+  LICENSE = "See LICENSE and the LGPL-3.0 for licensing details."
 
   DEFAULTS = {
-    queues: ['default'],
+    queues: ["default"],
     concurrency: 10,
-    require: '.',
-    environment: 'development',
+    require: ".",
+    environment: "development",
     # As of 2017, Heroku's process timeout is 30 seconds.
     # After 30 seconds, processes are KILLed so assume 25
     # seconds to gracefully shutdown and 5 seconds to hard
@@ -28,19 +28,20 @@ module Faktory
     lifecycle_events: {
       startup: [],
       quiet: [],
-      shutdown: [],
+      shutdown: []
     },
-    reloader: proc { |&block| block.call },
+    reloader: proc { |&block| block.call }
   }
 
   DEFAULT_JOB_OPTIONS = {
-    'retry' => 25,
-    'queue' => 'default'
+    "retry" => 25,
+    "queue" => "default"
   }
 
   def self.options
     @options ||= DEFAULTS.dup
   end
+
   def self.options=(opts)
     @options = opts
   end
@@ -101,8 +102,9 @@ module Faktory
 
   def self.default_job_options=(hash)
     # stringify
-    @default_job_options = default_job_options.merge(Hash[hash.map{|k, v| [k.to_s, v]}])
+    @default_job_options = default_job_options.merge(hash.map { |k, v| [k.to_s, v] }.to_h)
   end
+
   def self.default_job_options
     defined?(@default_job_options) ? @default_job_options : DEFAULT_JOB_OPTIONS
   end
@@ -110,6 +112,7 @@ module Faktory
   def self.load_json(string)
     JSON.parse(string)
   end
+
   def self.dump_json(object)
     JSON.generate(object)
   end
@@ -117,6 +120,7 @@ module Faktory
   def self.logger
     Faktory::Logging.logger
   end
+
   def self.logger=(log)
     Faktory::Logging.logger = log
   end
@@ -138,7 +142,7 @@ module Faktory
   #
   # The default error handler logs errors to Faktory.logger.
   def self.error_handlers
-    self.options[:error_handlers]
+    options[:error_handlers]
   end
 
   # Register a block to run at a point in the Faktory lifecycle.
@@ -164,5 +168,5 @@ module Faktory
   class Shutdown < Interrupt; end
 end
 
-require 'faktory/rails' if defined?(::Rails::Engine)
-require 'faktory/batch'
+require "faktory/rails" if defined?(::Rails::Engine)
+require "faktory/batch"

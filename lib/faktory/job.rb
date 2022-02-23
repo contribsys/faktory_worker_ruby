@@ -1,8 +1,8 @@
 # frozen_string_literal: true
-require 'faktory/tracking'
+
+require "faktory/tracking"
 
 module Faktory
-
   ##
   # Include this module in your Job class and you can easily create
   # asynchronous jobs:
@@ -27,7 +27,7 @@ module Faktory
     include Faktory::Trackable
 
     def self.included(base)
-      raise ArgumentError, "You cannot include Faktory::Job in an ActiveJob: #{base.name}" if base.ancestors.any? {|c| c.name == 'ActiveJob::Base' }
+      raise ArgumentError, "You cannot include Faktory::Job in an ActiveJob: #{base.name}" if base.ancestors.any? { |c| c.name == "ActiveJob::Base" }
 
       base.extend(ClassMethods)
       base.faktory_class_attribute :faktory_options_hash
@@ -62,7 +62,7 @@ module Faktory
       end
 
       def perform_async(*args)
-        client_push(@opts.merge('args'.freeze => args))
+        client_push(@opts.merge("args" => args))
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
@@ -73,10 +73,10 @@ module Faktory
         ts = (int < 1_000_000_000 ? now + int : int)
         at = Time.at(ts).utc.to_datetime.rfc3339(9)
 
-        item = @opts.merge('args'.freeze => args, 'at'.freeze => at)
+        item = @opts.merge("args" => args, "at" => at)
 
         # Optimization to enqueue something now that is scheduled to go out now or in the past
-        item.delete('at'.freeze) if ts <= now
+        item.delete("at") if ts <= now
 
         client_push(item)
       end
@@ -107,9 +107,8 @@ module Faktory
     end
 
     module ClassMethods
-
       def set(options)
-        Setter.new(Util.deep_merge(get_faktory_options, options, 'jobtype'.freeze => self))
+        Setter.new(Util.deep_merge(get_faktory_options, options, "jobtype" => self))
       end
 
       def perform_async(*args)
@@ -132,9 +131,9 @@ module Faktory
       #   backtrace - whether to save the error backtrace in the job payload to display in web UI,
       #      an integer number of lines to save, default *0*
       #
-      def faktory_options(opts={})
+      def faktory_options(opts = {})
         # stringify
-        self.faktory_options_hash = get_faktory_options.merge(Hash[opts.map{|k, v| [k.to_s, v]}])
+        self.faktory_options_hash = get_faktory_options.merge(opts.map { |k, v| [k.to_s, v] }.to_h)
       end
 
       def get_faktory_options # :nodoc:
@@ -196,7 +195,6 @@ module Faktory
           end
         end
       end
-
     end
 
     module Util
@@ -215,6 +213,5 @@ module Faktory
       end
       module_function :deep_merge
     end
-
   end
 end

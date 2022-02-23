@@ -1,9 +1,8 @@
 # frozen_string_literal: true
-require 'faktory/util'
-require 'faktory/fetch'
-require 'faktory/job_logger'
-require 'thread'
 
+require "faktory/util"
+require "faktory/fetch"
+require "faktory/job_logger"
 module Faktory
   ##
   # The Processor is a standalone thread which:
@@ -22,7 +21,6 @@ module Faktory
   # to replace itself and exits.
   #
   class Processor
-
     include Util
 
     attr_reader :thread
@@ -44,13 +42,13 @@ module Faktory
       @fetcher = Faktory::Fetcher.new(mgr.options)
     end
 
-    def terminate(wait=false)
+    def terminate(wait = false)
       @done = true
       return if !@thread
       @thread.value if wait
     end
 
-    def kill(wait=false)
+    def kill(wait = false)
       @done = true
       return if !@thread
       # unlike the other actors, terminate does not wait
@@ -69,30 +67,28 @@ module Faktory
     private unless $TESTING
 
     def run
-      begin
-        while !@done
-          process_one
-        end
-        @mgr.processor_stopped(self)
-      rescue Faktory::Shutdown
-        @mgr.processor_stopped(self)
-      rescue Exception => ex
-        @mgr.processor_died(self, ex)
+      until @done
+        process_one
       end
+      @mgr.processor_stopped(self)
+    rescue Faktory::Shutdown
+      @mgr.processor_stopped(self)
+    rescue Exception => ex
+      @mgr.processor_died(self, ex)
     end
 
     def process_one
       work = fetch
       if work
         @@busy_lock.synchronize do
-          @@busy_count = @@busy_count + 1
+          @@busy_count += 1
         end
         begin
           @job = work.job
           process(work)
         ensure
           @@busy_lock.synchronize do
-            @@busy_count = @@busy_count - 1
+            @@busy_count -= 1
           end
         end
       else
@@ -101,14 +97,15 @@ module Faktory
     end
 
     def fetch
-      begin
-        work = @fetcher.retrieve_work
-        (logger.info { "Faktory is online, #{Time.now - @down} sec downtime" }; @down = nil) if @down
-        work
-      rescue Faktory::Shutdown
-      rescue => ex
-        handle_fetch_exception(ex)
+      work = @fetcher.retrieve_work
+      if @down
+        (logger.info { "Faktory is online, #{Time.now - @down} sec downtime" }
+         @down = nil)
       end
+      work
+    rescue Faktory::Shutdown
+    rescue => ex
+      handle_fetch_exception(ex)
     end
 
     def handle_fetch_exception(ex)
@@ -131,9 +128,9 @@ module Faktory
           # the Reloader.  It handles code loading, db connection management, etc.
           # Effectively this block denotes a "unit of work" to Rails.
           @reloader.call do
-            klass  = constantize(payload['jobtype'.freeze])
+            klass = constantize(payload["jobtype"])
             jobinst = klass.new
-            jobinst.jid = payload['jid'.freeze]
+            jobinst.jid = payload["jid"]
             yield jobinst
           end
         end
@@ -145,7 +142,7 @@ module Faktory
       begin
         dispatch(payload) do |jobinst|
           Faktory.worker_middleware.invoke(jobinst, payload) do
-            jobinst.perform(*payload['args'.freeze])
+            jobinst.perform(*payload["args"])
           end
         end
         work.acknowledge
@@ -155,7 +152,7 @@ module Faktory
         # and immediately restart it.
         work.fail(shut)
       rescue Exception => ex
-        handle_exception(ex, { :context => "Job raised exception", :job => work.job })
+        handle_exception(ex, {context: "Job raised exception", job: work.job})
         work.fail(ex)
         raise ex
       end
@@ -166,13 +163,12 @@ module Faktory
     end
 
     def constantize(str)
-      names = str.split('::')
+      names = str.split("::")
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
         constant.const_defined?(name) ? constant.const_get(name) : constant.const_missing(name)
       end
     end
-
   end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Faktory
   # Middleware is code configured to run before/after
   # a job is processed.  It is patterned after Rack
@@ -106,7 +107,7 @@ module Faktory
         i = entries.index { |entry| entry.klass == newklass }
         new_entry = i.nil? ? Entry.new(newklass, *args) : entries.delete_at(i)
         i = entries.index { |entry| entry.klass == oldklass } || entries.count - 1
-        entries.insert(i+1, new_entry)
+        entries.insert(i + 1, new_entry)
       end
 
       def exists?(klass)
@@ -139,7 +140,7 @@ module Faktory
 
       def initialize(klass, *args)
         @klass = klass
-        @args  = args
+        @args = args
       end
 
       def make_new

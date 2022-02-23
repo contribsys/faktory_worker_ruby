@@ -3,15 +3,15 @@
 module Faktory
   UnitOfWork = Struct.new(:job) do
     def acknowledge
-      Faktory.server {|c| c.ack(jid) }
+      Faktory.server { |c| c.ack(jid) }
     end
 
     def fail(ex)
-      Faktory.server {|c| c.fail(jid, ex) }
+      Faktory.server { |c| c.fail(jid, ex) }
     end
 
     def jid
-      job['jid']
+      job["jid"]
     end
   end
 
@@ -39,6 +39,5 @@ module Faktory
         @queues.shuffle.uniq
       end
     end
-
   end
 end

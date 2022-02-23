@@ -1,7 +1,7 @@
-require 'helper'
+require "helper"
 
 class TestingFakeTest < LiveTest
-  describe 'faktory testing' do
+  describe "faktory testing" do
     class PerformError < RuntimeError; end
 
     class DirectJob
@@ -26,7 +26,7 @@ class TestingFakeTest < LiveTest
     end
 
     before do
-      require 'faktory/testing'
+      require "faktory/testing"
       Faktory::Testing.fake!
       EnqueuedJob.jobs.clear
       DirectJob.jobs.clear
@@ -37,31 +37,31 @@ class TestingFakeTest < LiveTest
       Faktory::Testing.disable!
     end
 
-    it 'stubs the async call' do
+    it "stubs the async call" do
       assert_equal 0, DirectJob.jobs.size
       assert DirectJob.perform_async(1, 2)
-      assert_in_delta Time.now.to_f, DirectJob.jobs.last['enqueued_at'], 0.1
+      assert_in_delta Time.now.to_f, DirectJob.jobs.last["enqueued_at"], 0.1
       assert_equal 1, DirectJob.jobs.size
       assert DirectJob.perform_in(10, 1, 2)
-      refute DirectJob.jobs.last['enqueued_at']
+      refute DirectJob.jobs.last["enqueued_at"]
       assert_equal 2, DirectJob.jobs.size
       assert DirectJob.perform_at(10, 1, 2)
       assert_equal 3, DirectJob.jobs.size
-      assert_in_delta Time.now.to_f, Time.parse(DirectJob.jobs.last['at']).to_f, 10.1
+      assert_in_delta Time.now.to_f, Time.parse(DirectJob.jobs.last["at"]).to_f, 10.1
     end
 
-    it 'stubs the push call' do
+    it "stubs the push call" do
       assert_equal 0, EnqueuedJob.jobs.size
       assert Faktory::Client.new.push({
         "jid" => SecureRandom.hex(12),
         "queue" => "default",
         "jobtype" => EnqueuedJob,
-        "args" => [1,2]
+        "args" => [1, 2]
       })
       assert_equal 1, EnqueuedJob.jobs.size
     end
 
-    it 'executes all stored jobs' do
+    it "executes all stored jobs" do
       assert StoredJob.perform_async(false)
       assert StoredJob.perform_async(true)
 
@@ -77,18 +77,18 @@ class TestingFakeTest < LiveTest
       faktory_class_attribute :count
       self.count = 0
       def perform(worker_jid)
-        return unless worker_jid == self.jid
+        return unless worker_jid == jid
         self.class.count += 1
       end
     end
 
-    it 'execute only jobs with assigned JID' do
+    it "execute only jobs with assigned JID" do
       4.times do |i|
         jid = SpecificJidJob.perform_async(nil)
-        if i % 2 == 0
-          SpecificJidJob.jobs[-1]["args"] = ["wrong_jid"]
+        SpecificJidJob.jobs[-1]["args"] = if i % 2 == 0
+          ["wrong_jid"]
         else
-          SpecificJidJob.jobs[-1]["args"] = [jid]
+          [jid]
         end
       end
 
@@ -102,14 +102,14 @@ class TestingFakeTest < LiveTest
       assert_equal 2, SpecificJidJob.count
     end
 
-    it 'round trip serializes the job arguments' do
+    it "round trip serializes the job arguments" do
       assert StoredJob.perform_async(:mike)
       job = StoredJob.jobs.first
-      assert_equal "mike", job['args'].first
+      assert_equal "mike", job["args"].first
       StoredJob.clear
     end
 
-    it 'perform_one runs only one job' do
+    it "perform_one runs only one job" do
       DirectJob.perform_async(1, 2)
       DirectJob.perform_async(3, 4)
       assert_equal 2, DirectJob.jobs.size
@@ -120,7 +120,7 @@ class TestingFakeTest < LiveTest
       DirectJob.clear
     end
 
-    it 'perform_one raise error upon empty queue' do
+    it "perform_one raise error upon empty queue" do
       DirectJob.clear
       assert_raises Faktory::EmptyQueueError do
         DirectJob.perform_one
@@ -154,7 +154,7 @@ class TestingFakeTest < LiveTest
       end
     end
 
-    it 'clears jobs across all workers' do
+    it "clears jobs across all workers" do
       Faktory::Job.jobs.clear
       FirstJob.count = 0
       SecondJob.count = 0
@@ -177,7 +177,7 @@ class TestingFakeTest < LiveTest
       assert_equal 0, SecondJob.count
     end
 
-    it 'drains jobs across all workers' do
+    it "drains jobs across all workers" do
       Faktory::Job.jobs.clear
       FirstJob.count = 0
       SecondJob.count = 0
@@ -203,7 +203,7 @@ class TestingFakeTest < LiveTest
       assert_equal 1, SecondJob.count
     end
 
-    it 'drains jobs across all workers even when workers create new jobs' do
+    it "drains jobs across all workers even when workers create new jobs" do
       Faktory::Job.jobs.clear
       FirstJob.count = 0
       SecondJob.count = 0
@@ -233,24 +233,24 @@ class TestingFakeTest < LiveTest
       end
     end
 
-    it 'drains jobs of workers with symbolized queue names' do
+    it "drains jobs of workers with symbolized queue names" do
       Faktory::Job.jobs.clear
 
-      AltQueueJob.perform_async(5,6)
+      AltQueueJob.perform_async(5, 6)
       assert_equal 1, AltQueueJob.jobs.size
 
       Faktory::Job.drain_all
       assert_equal 0, AltQueueJob.jobs.size
     end
 
-    it 'can execute a job' do
+    it "can execute a job" do
       DirectJob.execute_job(DirectJob.new, [2, 3])
     end
   end
 
-  describe 'queue testing' do
+  describe "queue testing" do
     before do
-      require 'faktory/testing'
+      require "faktory/testing"
       Faktory::Testing.fake!
     end
 
@@ -266,7 +266,7 @@ class TestingFakeTest < LiveTest
       end
     end
 
-    it 'finds enqueued jobs' do
+    it "finds enqueued jobs" do
       assert_equal 0, Faktory::Queues["default"].size
 
       QueueJob.perform_async(1, 2)
@@ -279,7 +279,7 @@ class TestingFakeTest < LiveTest
       assert_equal 1, Faktory::Queues["alt"].size
     end
 
-    it 'clears out all queues' do
+    it "clears out all queues" do
       assert_equal 0, Faktory::Queues["default"].size
 
       QueueJob.perform_async(1, 2)
@@ -294,18 +294,18 @@ class TestingFakeTest < LiveTest
       assert_equal 0, AltQueueJob.jobs.size
     end
 
-    it 'finds jobs enqueued by client' do
+    it "finds jobs enqueued by client" do
       Faktory::Client.new.push({
-        'jid' => SecureRandom.hex(12),
-        'jobtype' => 'NonExistentJob',
-        'queue' => 'missing',
-        'args' => [1]
+        "jid" => SecureRandom.hex(12),
+        "jobtype" => "NonExistentJob",
+        "queue" => "missing",
+        "args" => [1]
       })
 
       assert_equal 1, Faktory::Queues["missing"].size
     end
 
-    it 'respects underlying array changes' do
+    it "respects underlying array changes" do
       # Rspec expect change() syntax saves a reference to
       # an underlying array. When the array containing jobs is
       # derived, Rspec test using `change(QueueJob.jobs, :size).by(1)`
@@ -319,9 +319,9 @@ class TestingFakeTest < LiveTest
     end
   end
 
-  describe 'polyglot testing' do
+  describe "polyglot testing" do
     before do
-      require 'faktory/testing'
+      require "faktory/testing"
       Faktory::Testing.fake!
     end
 
@@ -330,25 +330,25 @@ class TestingFakeTest < LiveTest
       Faktory::Queues.clear_all
     end
 
-    it 'perform_async' do
-      Faktory::Job.set(queue: 'some_q', jobtype: 'someFunc').perform_async('some', 'args')
-      assert_equal 1, Faktory::Queues['some_q'].size
+    it "perform_async" do
+      Faktory::Job.set(queue: "some_q", jobtype: "someFunc").perform_async("some", "args")
+      assert_equal 1, Faktory::Queues["some_q"].size
 
-      job = Faktory::Queues['some_q'].first
-      assert_equal 'someFunc', job['jobtype']
-      assert_equal 'some_q', job['queue']
-      assert_equal ['some', 'args'], job['args']
+      job = Faktory::Queues["some_q"].first
+      assert_equal "someFunc", job["jobtype"]
+      assert_equal "some_q", job["queue"]
+      assert_equal ["some", "args"], job["args"]
     end
 
-    it 'perform_in' do
-      Faktory::Job.set(queue: 'some_q', jobtype: 'someFunc').perform_in(10, 'some', 'args')
-      assert_equal 1, Faktory::Queues['some_q'].size
+    it "perform_in" do
+      Faktory::Job.set(queue: "some_q", jobtype: "someFunc").perform_in(10, "some", "args")
+      assert_equal 1, Faktory::Queues["some_q"].size
 
-      job = Faktory::Queues['some_q'].first
-      assert_equal 'someFunc', job['jobtype']
-      assert_equal 'some_q', job['queue']
-      assert_equal ['some', 'args'], job['args']
-      assert_in_delta Time.now.to_f, Time.parse(job['at']).to_f, 10.1
+      job = Faktory::Queues["some_q"].first
+      assert_equal "someFunc", job["jobtype"]
+      assert_equal "some_q", job["queue"]
+      assert_equal ["some", "args"], job["args"]
+      assert_in_delta Time.now.to_f, Time.parse(job["at"]).to_f, 10.1
     end
   end
 end

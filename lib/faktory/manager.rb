@@ -1,13 +1,11 @@
-# encoding: utf-8
 # frozen_string_literal: true
-require 'faktory/util'
-require 'faktory/processor'
-require 'faktory/fetch'
-require 'thread'
-require 'set'
+
+require "faktory/util"
+require "faktory/processor"
+require "faktory/fetch"
+require "set"
 
 module Faktory
-
   ##
   # The Manager is the central coordination point in Faktory, controlling
   # the lifecycle of the Processors.
@@ -28,7 +26,7 @@ module Faktory
     attr_reader :threads
     attr_reader :options
 
-    def initialize(options={})
+    def initialize(options = {})
       logger.debug { options.inspect }
       @options = options
       @count = options[:concurrency] || 25
@@ -114,7 +112,7 @@ module Faktory
       end
 
       if cleanup.size > 0
-        jobs = cleanup.map {|p| p.job }.compact
+        jobs = cleanup.map { |p| p.job }.compact
 
         logger.warn { "Terminating #{cleanup.size} busy worker threads" }
         logger.warn { "Work still in progress #{jobs.inspect}" }
@@ -127,6 +125,5 @@ module Faktory
         processor.thread.join(1)
       end
     end
-
   end
 end

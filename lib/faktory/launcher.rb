@@ -1,6 +1,6 @@
-# encoding: utf-8
 # frozen_string_literal: true
-require 'faktory/manager'
+
+require "faktory/manager"
 
 module Faktory
   class Launcher
@@ -22,7 +22,7 @@ module Faktory
 
     # Stops this instance from processing any more jobs,
     def quiet
-      @current_state = 'quiet'
+      @current_state = "quiet"
       @manager.quiet
     end
 
@@ -32,17 +32,17 @@ module Faktory
     def stop
       deadline = Time.now + @options[:timeout]
 
-      @current_state = 'terminate'
+      @current_state = "terminate"
       @manager.quiet
       @manager.stop(deadline)
     end
 
     def stopping?
-      @current_state == 'terminate'
+      @current_state == "terminate"
     end
 
     def quiet?
-      @current_state == 'quiet'
+      @current_state == "quiet"
     end
 
     PROCTITLES = []
@@ -50,24 +50,24 @@ module Faktory
     private unless $TESTING
 
     def heartbeat
-      title = ['faktory-worker', Faktory::VERSION, @options[:tag]].compact.join(" ")
+      title = ["faktory-worker", Faktory::VERSION, @options[:tag]].compact.join(" ")
       PROCTITLES << proc { title }
       PROCTITLES << proc { "[#{Processor.busy_count} of #{@options[:concurrency]} busy]" }
       PROCTITLES << proc { "stopping" if stopping? }
       PROCTITLES << proc { "quiet" if quiet? }
 
       loop do
-        $0 = PROCTITLES.map {|p| p.call }.join(" ")
+        $0 = PROCTITLES.map { |p| p.call }.join(" ")
 
         begin
-          result = Faktory.server {|c| c.beat(@current_state, "rss_kb" => memory_usage(::Process.pid)) }
+          result = Faktory.server { |c| c.beat(@current_state, "rss_kb" => memory_usage(::Process.pid)) }
           case result
           when "OK"
             # all good
           when "terminate"
-            ::Process.kill('TERM', $$)
+            ::Process.kill("TERM", $$)
           when "quiet"
-            ::Process.kill('TSTP', $$)
+            ::Process.kill("TSTP", $$)
           else
             Faktory.logger.warn "Got unexpected BEAT: #{result}"
           end
@@ -97,7 +97,5 @@ module Faktory
     def memory_usage(pid)
       MEMORY_GRABBER.call(pid)
     end
-
-
   end
 end

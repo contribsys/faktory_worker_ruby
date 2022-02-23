@@ -1,12 +1,13 @@
 # frozen_string_literal: true
-require 'connection_pool'
+
+require "connection_pool"
 
 module Faktory
   class Connection
     class << self
-      def create(options={})
+      def create(options = {})
         size = Faktory.worker? ? (Faktory.options[:concurrency] + 2) : 5
-        ConnectionPool.new(:timeout => options[:pool_timeout] || 1, :size => size) do
+        ConnectionPool.new(timeout: options[:pool_timeout] || 1, size: size) do
           Faktory::Client.new(**options)
         end
       end

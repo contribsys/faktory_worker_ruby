@@ -33,6 +33,7 @@ module Faktory
     end
 
     private
+
     def read_timeout(nbytes)
       loop do
         result = @sock.read_nonblock(nbytes, exception: false)
@@ -40,7 +41,7 @@ module Faktory
           raise Faktory::TimeoutError unless @sock.to_io.wait_readable(@timeout)
         elsif result == :wait_writable
           raise Faktory::TimeoutError unless @sock.to_io.wait_writeable(@timeout)
-        elsif result == nil
+        elsif result.nil?
           raise Errno::ECONNRESET
         else
           return result

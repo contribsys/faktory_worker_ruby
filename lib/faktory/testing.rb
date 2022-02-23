@@ -10,7 +10,7 @@ module Faktory
 
     def self.__set_test_mode(mode)
       if block_given?
-        current_mode = self.__test_mode
+        current_mode = __test_mode
         begin
           self.__test_mode = mode
           yield
@@ -33,31 +33,31 @@ module Faktory
     def self.inline!(&block)
       # Only allow inline testing inside of a block
       # https://github.com/mperham/sidekiq/issues/3495
-      unless block_given?
-        raise 'Must provide a block to Faktory::Testing.inline!'
+      unless block
+        raise "Must provide a block to Faktory::Testing.inline!"
       end
 
       __set_test_mode(:inline, &block)
     end
 
     def self.enabled?
-      self.__test_mode != :disable
+      __test_mode != :disable
     end
 
     def self.disabled?
-      self.__test_mode == :disable
+      __test_mode == :disable
     end
 
     def self.fake?
-      self.__test_mode == :fake
+      __test_mode == :fake
     end
 
     def self.inline?
-      self.__test_mode == :inline
+      __test_mode == :inline
     end
 
     def self.constantize(str)
-      names = str.split('::')
+      names = str.split("::")
       names.shift if names.empty? || names.first.empty?
 
       names.inject(Object) do |constant, name|
@@ -81,14 +81,14 @@ module Faktory
     def push(job)
       if Faktory::Testing.inline?
         job = Faktory.load_json(Faktory.dump_json(job))
-        job_class = Faktory::Testing.constantize(job['jobtype'])
-        job_class.new.perform(*job['args'])
-        return job['jid']
+        job_class = Faktory::Testing.constantize(job["jobtype"])
+        job_class.new.perform(*job["args"])
+        job["jid"]
       elsif Faktory::Testing.fake?
         job = Faktory.load_json(Faktory.dump_json(job))
-        job.merge!('enqueued_at' => Time.now.to_f) unless job['at']
-        Queues.push(job['queue'], job['jobtype'], job)
-        return job['jid']
+        job.merge!("enqueued_at" => Time.now.to_f) unless job["at"]
+        Queues.push(job["queue"], job["jobtype"], job)
+        job["jid"]
       else
         real_push(job)
       end
@@ -259,27 +259,26 @@ module Faktory
     #   Then I should receive a welcome email to "foo@example.com"
     #
     module ClassMethods
-
       # Queue for this worker
       def queue
-        self.faktory_options["queue"]
+        faktory_options["queue"]
       end
 
       # Jobs queued for this worker
       def jobs
-        Queues.jobs_by_worker[self.to_s]
+        Queues.jobs_by_worker[to_s]
       end
 
       # Clear all jobs for this worker
       def clear
-        Queues.clear_for(queue, self.to_s)
+        Queues.clear_for(queue, to_s)
       end
 
       # Drain and run all jobs for this worker
       def drain
         while jobs.any?
           next_job = jobs.first
-          Queues.delete_for(next_job["jid"], next_job["queue"], self.to_s)
+          Queues.delete_for(next_job["jid"], next_job["queue"], to_s)
           process_job(next_job)
         end
       end
@@ -288,17 +287,17 @@ module Faktory
       def perform_one
         raise(EmptyQueueError, "perform_one called with empty job queue") if jobs.empty?
         next_job = jobs.first
-        Queues.delete_for(next_job["jid"], queue, self.to_s)
+        Queues.delete_for(next_job["jid"], queue, to_s)
         process_job(next_job)
       end
 
       def process_job(job)
         worker = new
-        worker.jid = job['jid']
-        worker.bid = job['bid'] if worker.respond_to?(:bid=)
-        #Faktory::Testing.server_middleware.invoke(worker, job, job['queue']) do
-          execute_job(worker, job['args'])
-        #end
+        worker.jid = job["jid"]
+        worker.bid = job["bid"] if worker.respond_to?(:bid=)
+        # Faktory::Testing.server_middleware.invoke(worker, job, job['queue']) do
+        execute_job(worker, job["args"])
+        # end
       end
 
       def execute_job(worker, args)
@@ -328,5 +327,4 @@ module Faktory
       end
     end
   end
-
 end

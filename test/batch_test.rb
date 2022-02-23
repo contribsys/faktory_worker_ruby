@@ -1,8 +1,8 @@
-require_relative './helper'
+require_relative "./helper"
 
 class BatchTest < Minitest::Test
   def setup
-    Faktory.server{|c| c.flush}
+    Faktory.server { |c| c.flush }
   end
 
   class BatchJob
@@ -13,7 +13,7 @@ class BatchTest < Minitest::Test
 
   class CustomBatchJob
     include Faktory::Job
-    faktory_options custom: { track: 1 }
+    faktory_options custom: {track: 1}
     def perform(*)
     end
   end

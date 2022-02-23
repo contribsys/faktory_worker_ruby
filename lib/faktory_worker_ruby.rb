@@ -1,1 +1,1 @@
-require 'faktory'
+require "faktory"

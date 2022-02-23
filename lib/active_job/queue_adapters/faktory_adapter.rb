@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'active_job'
+require "active_job"
 
 module ActiveJob
   module QueueAdapters
@@ -10,21 +10,21 @@ module ActiveJob
     #
     #   Rails.application.config.active_job.queue_adapter = :faktory
     class FaktoryAdapter
-      def enqueue(job) #:nodoc:
+      def enqueue(job) # :nodoc:
         enqueue_at(job, nil)
       end
 
-      def enqueue_at(job, timestamp) #:nodoc:
+      def enqueue_at(job, timestamp) # :nodoc:
         jid = SecureRandom.hex(12)
         job.provider_job_id = jid
         hash = {
-          "jid"     => jid,
+          "jid" => jid,
           "jobtype" => JobWrapper.to_s,
-          "custom"  => {
-            "wrapped" => job.class.to_s,
+          "custom" => {
+            "wrapped" => job.class.to_s
           },
-          "queue"   => job.queue_name,
-          "args"    => [ job.serialize ],
+          "queue" => job.queue_name,
+          "args" => [job.serialize]
         }
         opts = job.faktory_options_hash.dup
         hash["at"] = Time.at(timestamp).utc.to_datetime.rfc3339(9) if timestamp
@@ -40,7 +40,7 @@ module ActiveJob
         end
       end
 
-      class JobWrapper #:nodoc:
+      class JobWrapper # :nodoc:
         include Faktory::Job
 
         def perform(job_data)
@@ -55,7 +55,7 @@ module ActiveJob
     self.faktory_options_hash = {}
 
     def self.faktory_options(hsh)
-      self.faktory_options_hash = self.faktory_options_hash.stringify_keys.merge(hsh.stringify_keys)
+      self.faktory_options_hash = faktory_options_hash.stringify_keys.merge(hsh.stringify_keys)
     end
   end
 end

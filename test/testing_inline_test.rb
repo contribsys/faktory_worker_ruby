@@ -1,8 +1,9 @@
-require 'helper'
+require "helper"
 
 class TestingInlineTest < LiveTest
-  describe 'faktory inline testing' do
+  describe "faktory inline testing" do
     class InlineError < RuntimeError; end
+
     class ParameterIsNotString < RuntimeError; end
 
     class InlineJob
@@ -20,14 +21,14 @@ class TestingInlineTest < LiveTest
     end
 
     before do
-      require 'faktory/testing'
+      require "faktory/testing"
     end
 
     after do
       Faktory::Testing.disable!
     end
 
-    it 'stubs the async call when in testing mode' do
+    it "stubs the async call when in testing mode" do
       Faktory::Testing.inline! do
         assert InlineJob.perform_async(true)
 
@@ -43,7 +44,7 @@ class TestingInlineTest < LiveTest
       end
     end
 
-    it 'stubs the push call when in testing mode' do
+    it "stubs the push call when in testing mode" do
       Faktory::Testing.inline! do
         client = Faktory::Client.new
         assert client.push({
@@ -64,10 +65,10 @@ class TestingInlineTest < LiveTest
       end
     end
 
-    it 'raises error for non-existing jobtype class' do
+    it "raises error for non-existing jobtype class" do
       Faktory::Testing.inline! do
         assert_raises NameError do
-          Faktory::Job.set(jobtype: 'someFunc').perform_async
+          Faktory::Job.set(jobtype: "someFunc").perform_async
         end
       end
     end

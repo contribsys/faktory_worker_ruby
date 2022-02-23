@@ -1,6 +1,5 @@
 module Faktory
   module Trackable
-
     ##
     # Tracking allows a long-running Faktory job to report its progress:
     #
@@ -22,10 +21,10 @@ module Faktory
     # 4. reserve_until allows a job to dynamically extend its reservation so it is not garbage collected by Faktory while running
     # 5. you can only reserve up to 24 hours.
     #
-    def track_progress(percent, desc=nil, reserve_until:nil)
-      hash = { 'jid' => jid, 'percent' => percent.to_i, 'desc' => desc }
+    def track_progress(percent, desc = nil, reserve_until: nil)
+      hash = {"jid" => jid, "percent" => percent.to_i, "desc" => desc}
       hash["reserve_until"] = convert(reserve_until) if reserve_until
-      Faktory.server {|c| c.set_track(hash) }
+      Faktory.server { |c| c.set_track(hash) }
     end
 
     private
