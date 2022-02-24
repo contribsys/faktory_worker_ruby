@@ -16,7 +16,7 @@ module Faktory
 
       def context
         c = Thread.current[:faktory_context]
-        " #{c.join(SPACE)}" if c && c.any?
+        " #{c.join(SPACE)}" if c&.any?
       end
     end
 
@@ -45,7 +45,7 @@ module Faktory
       Thread.current[:faktory_context].pop
     end
 
-    def self.initialize_logger(log_target = STDOUT)
+    def self.initialize_logger(log_target = $stdout)
       oldlogger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO

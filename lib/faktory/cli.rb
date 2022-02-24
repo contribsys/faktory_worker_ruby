@@ -86,8 +86,8 @@ module Faktory
       begin
         launcher.run
 
-        while readable_io = IO.select([self_read])
-          signal = readable_io.first[0].gets.strip
+        while self_read.wait_readable
+          signal = self_read.gets.strip
           handle_signal(signal)
         end
       rescue Interrupt
@@ -186,7 +186,7 @@ module Faktory
         require File.expand_path("#{options[:require]}/config/environment.rb")
         options[:tag] ||= default_tag
       else
-        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " +
+        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " \
           "./#{options[:require]} or /path/to/#{options[:require]}"
 
         require(options[:require]) || raise(ArgumentError, not_required_message)
@@ -196,7 +196,7 @@ module Faktory
     def default_tag
       dir = ::Rails.root
       name = File.basename(dir)
-      if name.to_i != 0 && prevdir = File.dirname(dir) # Capistrano release directory?
+      if name.to_i != 0 && (prevdir = File.dirname(dir)) # Capistrano release directory?
         if File.basename(prevdir) == "releases"
           return File.basename(File.dirname(prevdir))
         end
@@ -292,12 +292,10 @@ module Faktory
     def parse_config(cfile)
       opts = {}
       if File.exist?(cfile)
-        opts = YAML.load(ERB.new(IO.read(cfile)).result) || opts
+        src = ERB.new(IO.read(cfile)).result
+        opts = YAML.safe_load(src, permitted_classes: [Symbol], aliases: true) || {}
         opts = opts.merge(opts.delete(environment) || {})
         parse_queues(opts, opts.delete(:queues) || [])
-      else
-        # allow a non-existent config file so Faktory
-        # can be deployed by cap with just the defaults.
       end
       opts
     end

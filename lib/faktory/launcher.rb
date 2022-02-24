@@ -71,7 +71,7 @@ module Faktory
           else
             Faktory.logger.warn "Got unexpected BEAT: #{result}"
           end
-        rescue => ex
+        rescue
           # best effort, try again in a few secs
         end
         sleep 10

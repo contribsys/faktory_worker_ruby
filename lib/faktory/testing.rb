@@ -86,7 +86,7 @@ module Faktory
         job["jid"]
       elsif Faktory::Testing.fake?
         job = Faktory.load_json(Faktory.dump_json(job))
-        job.merge!("enqueued_at" => Time.now.to_f) unless job["at"]
+        job["enqueued_at"] = Time.now.to_f unless job["at"]
         Queues.push(job["queue"], job["jobtype"], job)
         job["jid"]
       else

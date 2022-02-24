@@ -56,7 +56,7 @@ module Faktory
     end
 
     # hack for quicker development / testing environment
-    PAUSE_TIME = STDOUT.tty? ? 0.1 : 0.5
+    PAUSE_TIME = $stdout.tty? ? 0.1 : 0.5
 
     def stop(deadline)
       quiet

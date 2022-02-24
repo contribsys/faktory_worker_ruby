@@ -35,7 +35,7 @@ module Faktory
             ::Mail::SMTP::DEFAULTS[:read_timeout] ||= 5
             ::Mail::SMTP::DEFAULTS[:open_timeout] ||= 5
           end
-        rescue => ex
+        rescue
           # ignore
         end
       end

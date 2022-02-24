@@ -5,8 +5,8 @@ require "faktory"
 module Faktory
   module ExceptionHandler
     class Logger
-      def call(ex, ctxHash)
-        Faktory.logger.warn(Faktory.dump_json(ctxHash)) if !ctxHash.empty?
+      def call(ex, ctx_hash)
+        Faktory.logger.warn(Faktory.dump_json(ctx_hash)) if !ctx_hash.empty?
         Faktory.logger.warn "#{ex.class.name}: #{ex.message}"
         Faktory.logger.warn ex.backtrace.join("\n") unless ex.backtrace.nil?
       end
@@ -15,9 +15,9 @@ module Faktory
       Faktory.error_handlers << Faktory::ExceptionHandler::Logger.new
     end
 
-    def handle_exception(ex, ctxHash = {})
+    def handle_exception(ex, ctx_hash = {})
       Faktory.error_handlers.each do |handler|
-        handler.call(ex, ctxHash)
+        handler.call(ex, ctx_hash)
       rescue => ex
         Faktory.logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
         Faktory.logger.error ex

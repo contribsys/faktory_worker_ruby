@@ -53,19 +53,19 @@ module Faktory
 
     def discard(target, &block)
       filter = Filter.new
-      block.call(filter) if block
+      block&.call(filter)
       mutate("discard", target, filter)
     end
 
     def kill(target, &block)
       filter = Filter.new
-      block.call(filter) if block
+      block&.call(filter)
       mutate("kill", target, filter)
     end
 
     def requeue(target, &block)
       filter = Filter.new
-      block.call(filter) if block
+      block&.call(filter)
       mutate("requeue", target, filter)
     end
 

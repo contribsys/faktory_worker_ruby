@@ -14,7 +14,7 @@ module Faktory
     # We have to implement them ourselves by using
     # nonblocking IO and IO.select.
     def initialize(**opts)
-      @buf = "".dup
+      @buf = +""
       @timeout = opts[:timeout] || 5
     end
 

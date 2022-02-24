@@ -56,7 +56,7 @@ module Faktory
       @location = URI(url)
       @timeout = timeout
 
-      open(@timeout)
+      open_socket(@timeout)
     end
 
     def close
@@ -205,7 +205,7 @@ module Faktory
     # Return a string signal to process, legal values are "quiet" or "terminate".
     # The quiet signal is informative: the server won't allow this process to FETCH
     # any more jobs anyways.
-    def beat(current_state = nil, hash)
+    def beat(current_state = nil, hash = {})
       transaction do
         hash["wid"] = @@random_process_wid
         hash["current_state"] = current_state if current_state
@@ -240,7 +240,7 @@ module Faktory
       @location.scheme =~ /tls/
     end
 
-    def open(timeout = DEFAULT_TIMEOUT)
+    def open_socket(timeout = DEFAULT_TIMEOUT)
       if tls?
         require "openssl"
         sock = TCPSocket.new(@location.hostname, @location.port)
@@ -308,7 +308,7 @@ module Faktory
       # have an underlying socket.  Now if you disable testing and try to use that
       # client, it will crash without a socket.  This open() handles that case to
       # transparently open a socket.
-      open(@timeout) if !@sock
+      open_socket(@timeout) if !@sock
 
       begin
         yield
@@ -322,7 +322,7 @@ module Faktory
             nil
           end
           @sock = nil
-          open(@timeout)
+          open_socket(@timeout)
           retry
         else
           raise
@@ -343,7 +343,7 @@ module Faktory
         count = line[1..-1].strip.to_i
         return nil if count == -1
         data = read(count) if count > 0
-        line = gets # read extra linefeeds
+        _ = gets # read extra linefeeds
         data
       elsif chr == "-"
         # Server can respond with:
