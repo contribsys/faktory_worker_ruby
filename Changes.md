@@ -1,5 +1,9 @@
 # Changes
 
+## HEAD
+
+- Integrate `standard` linter. Update codebase.
+
 ## 1.1.1
 
 - Fix OpenSSL error [#59]
