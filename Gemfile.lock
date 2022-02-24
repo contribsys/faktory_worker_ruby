@@ -7,14 +7,15 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (7.0.2.2)
-      activesupport (= 7.0.2.2)
+    activejob (6.1.4.6)
+      activesupport (= 6.1.4.6)
       globalid (>= 0.3.6)
-    activesupport (7.0.2.2)
+    activesupport (6.1.4.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     ast (2.4.2)
     concurrent-ruby (1.1.9)
     connection_pool (2.2.5)
@@ -60,12 +61,13 @@ GEM
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.1.0)
+    zeitwerk (2.5.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  activejob (>= 5.2.0)
+  activejob (< 7)
   faktory_worker_ruby!
   minitest (~> 5)
   minitest-hooks
