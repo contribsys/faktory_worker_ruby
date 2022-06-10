@@ -108,11 +108,13 @@ module Faktory
 
     module ClassMethods
       def set(options)
-        Setter.new(Util.deep_merge(get_faktory_options, options, "jobtype" => self))
+        opts = get_faktory_options.dup
+        opts["jobtype"] = self
+        Setter.new(Util.deep_merge(opts, options))
       end
 
       def perform_async(*args)
-        set(get_faktory_options).perform_async(*args)
+        set({}).perform_async(*args)
       end
 
       # +interval+ must be a timestamp, numeric or something that acts
