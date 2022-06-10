@@ -120,7 +120,7 @@ module Faktory
       # +interval+ must be a timestamp, numeric or something that acts
       #   numeric (like an activesupport time interval).
       def perform_in(interval, *args)
-        set(get_faktory_options).perform_in(interval, *args)
+        set({}).perform_in(interval, *args)
       end
       alias_method :perform_at, :perform_in
 
