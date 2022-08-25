@@ -287,7 +287,7 @@ module Faktory
           iter = (hash["i"] || 1).to_i
           raise ArgumentError, "Invalid hashing" if iter < 1
 
-          payload["pwdhash"] = HASHER.call(iter, pwd, salt)
+          payload["pwdhash"] = HASHER.call(iter, URI.unescape(pwd), salt)
         end
       end
 
