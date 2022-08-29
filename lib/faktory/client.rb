@@ -1,6 +1,7 @@
 require "socket"
 require "json"
 require "uri"
+require "cgi"
 require "digest"
 require "securerandom"
 require "timeout"
@@ -287,7 +288,7 @@ module Faktory
           iter = (hash["i"] || 1).to_i
           raise ArgumentError, "Invalid hashing" if iter < 1
 
-          payload["pwdhash"] = HASHER.call(iter, URI.decode_www_form_component(pwd), salt)
+          payload["pwdhash"] = HASHER.call(iter, CGI.unescape(pwd), salt)
         end
       end
 
