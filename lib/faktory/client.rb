@@ -164,6 +164,11 @@ module Faktory
     # Returned value will either be the JID String if successful OR
     # a symbol corresponding to an error.
     def push(job)
+      job["jid"] ||= SecureRandom.hex(12)
+      job["queue"] ||= "default"
+      raise ArgumentError, "Missing `jobtype` attribute: #{job.inspect}" unless job["jobtype"]
+      raise ArgumentError, "Missing `args` attribute: #{job.inspect}" unless job["args"]
+
       transaction do
         command "PUSH", Faktory.dump_json(job)
         ok(job["jid"])
