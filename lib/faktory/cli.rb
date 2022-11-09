@@ -176,6 +176,9 @@ module Faktory
     end
 
     def boot_rails_app
+        logger.debug("Found rails app in #{options[:require]}")
+        logger.debug("Worker boot: loading rails and config/environment.rb")
+
         require "rails"
         require "faktory/rails"
         require File.expand_path("#{options[:require]}/config/environment.rb")
@@ -183,13 +186,13 @@ module Faktory
     end
 
     def boot_worker(req_file)
-        require(req_file) && logger.info("Loaded #{req_file}")
+        require(req_file) && logger.debug("Standalone worker boot: loaded #{req_file}")
     end
 
     def boot_worker_multi
-        rb_files = Dir.glob("#{options[:require]}/**/*.rb").flatten
+        rb_files = Dir.glob("./#{options[:require]}/**/*.rb").flatten
         rb_files.each do |req_file|
-          boot_worker(req_file)
+          boot_worker(File.expand_path(req_file))
         end
     end
 
