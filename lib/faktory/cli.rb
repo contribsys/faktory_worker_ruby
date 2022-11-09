@@ -175,22 +175,30 @@ module Faktory
       Faktory.options
     end
 
-    def boot_system
-      ENV["RACK_ENV"] = ENV["RAILS_ENV"] = environment
-
-      raise ArgumentError, "#{options[:require]} does not exist" unless File.exist?(options[:require])
-
-      if File.directory?(options[:require])
+    def boot_rails_app
         require "rails"
         require "faktory/rails"
         require File.expand_path("#{options[:require]}/config/environment.rb")
         options[:tag] ||= default_tag
-      else
-        not_required_message = "#{options[:require]} was not required, you should use an explicit path: " \
-          "./#{options[:require]} or /path/to/#{options[:require]}"
+    end
 
-        require(options[:require]) || raise(ArgumentError, not_required_message)
-      end
+    def boot_worker(req_file)
+        require(req_file) && logger.info("Loaded #{req_file}")
+    end
+
+    def boot_worker_multi
+        rb_files = Dir.glob("#{options[:require]}/**/*.rb").flatten
+        rb_files.each do |req_file|
+          boot_worker(req_file)
+        end
+    end
+
+    def boot_system
+      ENV["RACK_ENV"] = ENV["RAILS_ENV"] = environment
+
+      boot_rails_app if req_is_rails_app?
+      boot_worker(options[:require]) if req_is_single_file?
+      boot_worker_multi if req_is_class_dir?
     end
 
     def default_tag
@@ -204,15 +212,35 @@ module Faktory
       name
     end
 
+    # Have we been passed a single file to require? e.g. "./worker.rb"
+    def req_is_single_file?
+      File.exist?(options[:require]) &&
+        !File.directory?(options[:require])
+    end
+
+    # Have we been given the root of rails directory?
+    def req_is_rails_app?
+      File.directory?(options[:require]) &&
+        File.exist?("#{options[:require]}/config/application.rb")
+    end
+
+    # Have we been given a directory with many .rb files? e.g. "./lib/jobs"
+    def req_is_class_dir?
+      File.directory?(options[:require]) &&
+        !Dir.glob("#{options[:require]}/**/*.rb").empty? &&
+        !req_is_rails_app?
+    end
+
     def validate!
       options[:queues] << "default" if options[:queues].empty?
 
-      if !File.exist?(options[:require]) ||
-          (File.directory?(options[:require]) && !File.exist?("#{options[:require]}/config/application.rb"))
-        logger.info "=================================================================="
-        logger.info "  Please point Faktory to a Rails application or a Ruby file  "
-        logger.info "  to load your worker classes with -r [DIR|FILE]."
-        logger.info "=================================================================="
+      unless req_is_single_file? || req_is_rails_app? || req_is_class_dir?
+        logger.info "========================================================================"
+        logger.info "  Require option (-r) does not exist or is not what we expect.          "
+        logger.info "                                                                        "
+        logger.info "  Please point Faktory to the root of a Rails application, a Ruby file, "
+        logger.info "  or a directory containing job classes. ex: -r [DIR|FILE]              "
+        logger.info "========================================================================"
         logger.info @parser
         die(1)
       end
