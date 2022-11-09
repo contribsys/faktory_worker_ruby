@@ -175,9 +175,28 @@ module Faktory
       Faktory.options
     end
 
+    # Have we been passed a single file to require? e.g. "./worker.rb"
+    def req_is_single_file?
+      File.exist?(options[:require]) &&
+        !File.directory?(options[:require])
+    end
+
+    # Have we been given the root of rails directory?
+    def req_is_rails_app?
+      File.directory?(options[:require]) &&
+        File.exist?("#{options[:require]}/config/application.rb")
+    end
+
+    # Have we been given a directory with many .rb files? e.g. "./lib/jobs"
+    def req_is_class_dir?
+      File.directory?(options[:require]) &&
+        !Dir.glob("#{options[:require]}/**/*.rb").empty? &&
+        !req_is_rails_app?
+    end
+
     def boot_rails_app
-        logger.debug("Found rails app in #{options[:require]}")
-        logger.debug("Worker boot: loading rails and config/environment.rb")
+        logger.debug("[boot] Found rails app in #{options[:require]}")
+        logger.debug("[boot] loading rails and config/environment.rb")
 
         require "rails"
         require "faktory/rails"
@@ -186,10 +205,12 @@ module Faktory
     end
 
     def boot_worker(req_file)
-        require(req_file) && logger.debug("Standalone worker boot: loaded #{req_file}")
+        require(req_file) && logger.debug("[boot] loaded #{req_file}")
     end
 
     def boot_worker_multi
+        logger.debug("[boot] Found multi-job directory in #{options[:require]}")
+
         rb_files = Dir.glob("./#{options[:require]}/**/*.rb").flatten
         rb_files.each do |req_file|
           boot_worker(File.expand_path(req_file))
@@ -213,25 +234,6 @@ module Faktory
         end
       end
       name
-    end
-
-    # Have we been passed a single file to require? e.g. "./worker.rb"
-    def req_is_single_file?
-      File.exist?(options[:require]) &&
-        !File.directory?(options[:require])
-    end
-
-    # Have we been given the root of rails directory?
-    def req_is_rails_app?
-      File.directory?(options[:require]) &&
-        File.exist?("#{options[:require]}/config/application.rb")
-    end
-
-    # Have we been given a directory with many .rb files? e.g. "./lib/jobs"
-    def req_is_class_dir?
-      File.directory?(options[:require]) &&
-        !Dir.glob("#{options[:require]}/**/*.rb").empty? &&
-        !req_is_rails_app?
     end
 
     def validate!
