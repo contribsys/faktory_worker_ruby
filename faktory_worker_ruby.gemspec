@@ -11,7 +11,6 @@ Gem::Specification.new do |gem|
 
   gem.executables = ["faktory-worker"]
   gem.files = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
-  gem.test_files = []
   gem.version = Faktory::VERSION
   gem.required_ruby_version = ">= 2.5.0"
 

@@ -70,7 +70,7 @@ module Faktory
       def perform_in(interval, *args)
         int = interval.to_f
         now = Time.now.to_f
-        ts = (int < 1_000_000_000 ? now + int : int)
+        ts = ((int < 1_000_000_000) ? now + int : int)
         at = Time.at(ts).utc.to_datetime.rfc3339(9)
 
         item = @opts.merge("args" => args, "at" => at)

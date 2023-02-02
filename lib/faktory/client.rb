@@ -402,4 +402,3 @@ module Faktory
     end
   end
 end
-

@@ -5,4 +5,4 @@ gem "standard", group: [:development, :test]
 
 gemspec
 
-gem "activejob", "<7"
+gem "activejob"
