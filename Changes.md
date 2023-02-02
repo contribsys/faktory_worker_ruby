@@ -1,7 +1,9 @@
 # Changes
 
-## HEAD
+## 1.2.0
 
+- Dup options before deep merging [#67]
+- Provide default values for `jid` and `queue` if unset
 - Integrate `standard` linter. Update codebase.
 
 ## 1.1.1
