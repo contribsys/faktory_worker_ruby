@@ -164,6 +164,7 @@ module Faktory
     # Returned value will either be the JID String if successful OR
     # a symbol corresponding to an error.
     def push(job)
+      job = job.transform_keys(&:to_s)
       job["jid"] ||= SecureRandom.hex(12)
       job["queue"] ||= "default"
       raise ArgumentError, "Missing `jobtype` attribute: #{job.inspect}" unless job["jobtype"]
