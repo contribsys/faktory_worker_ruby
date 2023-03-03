@@ -1,5 +1,10 @@
 # Changes
 
+## 1.3.0
+
+- Provide more batch helper methods along with a more complex
+  workflow in `examples/complex_workflow.rb`.
+
 ## 1.2.0
 
 - Dup options before deep merging [#67]

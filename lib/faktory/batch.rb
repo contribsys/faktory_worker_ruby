@@ -91,6 +91,10 @@ module Faktory
       @bid = bid
     end
 
+    def parent=(parent)
+      @parent_bid = parent.bid
+    end
+
     def success=(val)
       raise "Batch cannot be modified once created" if bid
       @success = to_callback(val)

@@ -131,6 +131,7 @@ module Faktory
             klass = constantize(payload["jobtype"])
             jobinst = klass.new
             jobinst.jid = payload["jid"]
+            jobinst._custom = payload["custom"]
             yield jobinst
           end
         end

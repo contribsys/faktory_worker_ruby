@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    faktory_worker_ruby (1.2.0)
+    faktory_worker_ruby (1.3.0)
       connection_pool (~> 2.2, >= 2.2.2)
 
 GEM

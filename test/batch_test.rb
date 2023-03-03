@@ -71,7 +71,7 @@ class BatchTest < Minitest::Test
       BatchJob.perform_async
 
       child = Faktory::Batch.new
-      child.parent_bid = parent.bid
+      child.parent = parent
       child.success = BarJob.to_s
       child.jobs do
         BatchJob.perform_async

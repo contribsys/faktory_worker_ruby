@@ -23,6 +23,7 @@ module Faktory
   module Job
     attr_accessor :jid
     attr_accessor :bid
+    attr_accessor :_custom
 
     include Faktory::Trackable
 
@@ -37,10 +38,24 @@ module Faktory
       Setter.new(options)
     end
 
+    # this method is typically called within a batch job to reopen
+    # the batch in order to add more jobs.
     def batch
       if bid
         @batch ||= Faktory::Batch.new(bid)
       end
+    end
+
+    # this method is typically called within a child batch callback to reopen
+    # the parent batch in order to add more jobs or workflow steps.
+    def parent_batch
+      if parent_bid
+        @parent_batch ||= Faktory::Batch.new(parent_bid)
+      end
+    end
+
+    def parent_bid
+      _custom["_pbid"]
     end
 
     def logger
