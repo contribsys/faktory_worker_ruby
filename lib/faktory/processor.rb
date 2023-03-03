@@ -73,7 +73,7 @@ module Faktory
       @mgr.processor_stopped(self)
     rescue Faktory::Shutdown
       @mgr.processor_stopped(self)
-    rescue Exception => ex
+    rescue Exception => ex # rubocop:disable Lint/RescueException
       @mgr.processor_died(self, ex)
     end
 
@@ -151,7 +151,7 @@ module Faktory
         # the timeout.  Fail it so we can release any locks server-side
         # and immediately restart it.
         work.fail(shut)
-      rescue Exception => ex
+      rescue Exception => ex # rubocop:disable Lint/RescueException
         handle_exception(ex, {context: "Job raised exception", job: work.job})
         work.fail(ex)
         raise ex

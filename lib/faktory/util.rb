@@ -15,7 +15,7 @@ module Faktory
 
     def watchdog(last_words)
       yield
-    rescue Exception => ex
+    rescue Exception => ex # rubocop:disable Lint/RescueException
       handle_exception(ex, {context: last_words})
       raise ex
     end

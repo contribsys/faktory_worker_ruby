@@ -12,10 +12,10 @@ class SystemTest < LiveTest
 
   def randjob(idx)
     {
-      "jid"     => "1231278127839" + idx.to_s,
-      "queue"   => "default",
+      "jid" => "1231278127839" + idx.to_s,
+      "queue" => "default",
       "jobtype" => "SomeJob",
-      "args"    => [1, "string", 3]
+      "args" => [1, "string", 3]
     }
   end
 

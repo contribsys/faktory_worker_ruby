@@ -5,7 +5,7 @@ module Faktory
       logger.info("start".freeze)
       yield
       logger.info("done: #{elapsed(start)} sec")
-    rescue Exception
+    rescue Exception # rubocop:disable Lint/RescueException
       logger.info("fail: #{elapsed(start)} sec")
       raise
     end
