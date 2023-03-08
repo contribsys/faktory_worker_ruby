@@ -94,7 +94,7 @@ module Faktory
       end
     end
 
-    def open(*args)
+    def open_socket(*args)
       unless Faktory::Testing.enabled?
         real_open(*args)
       end

@@ -163,6 +163,7 @@ module Faktory
     # Hash must contain "jid", "jobtype" and "args" elements at minimum.
     # Returned value will either be the JID String if successful OR
     # a symbol corresponding to an error.
+    # NB: aliased by faktory/testing
     def push(job)
       job = job.transform_keys(&:to_s)
       job["jid"] ||= SecureRandom.hex(12)
@@ -247,6 +248,7 @@ module Faktory
       @location.scheme =~ /tls/
     end
 
+    # NB: aliased by faktory/testing
     def open_socket(timeout = DEFAULT_TIMEOUT)
       if tls?
         require "openssl"
