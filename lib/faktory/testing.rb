@@ -76,7 +76,7 @@ module Faktory
 
   class Client
     alias_method :real_push, :push
-    alias_method :real_open, :open
+    alias_method :real_open_socket, :open_socket
 
     def push(job)
       if Faktory::Testing.inline?
@@ -96,7 +96,7 @@ module Faktory
 
     def open_socket(*args)
       unless Faktory::Testing.enabled?
-        real_open(*args)
+        real_open_socket(*args)
       end
     end
   end
