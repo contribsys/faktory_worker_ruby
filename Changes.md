@@ -2,6 +2,7 @@
 
 ## 1.3.0
 
+- Fix `faktory/testing` [#74]
 - Provide more batch helper methods along with a more complex
   workflow in `examples/complex_workflow.rb`.
 
