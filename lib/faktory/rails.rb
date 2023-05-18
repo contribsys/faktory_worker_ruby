@@ -22,7 +22,7 @@ module Faktory
         # None of this matters on the client-side, only within the Faktory executor itself.
         #
         Faktory.configure_worker do |_|
-          if ::Rails::VERSION::MAJOR < 5
+          if ::Rails::VERSION::MAJOR < 6
             raise "Your current version of Rails, #{::Rails::VERSION::STRING}, is not supported"
           end
 
@@ -58,9 +58,9 @@ module Faktory
     end
   end
 
-  if defined?(::Rails) && ::Rails::VERSION::MAJOR < 5
+  if defined?(::Rails) && ::Rails::VERSION::MAJOR < 6
     warn("**************************************************")
-    warn("🚫 ERROR: Faktory Worker does not support Rails versions under 5.x - please ensure your workers are updated")
+    warn("🚫 ERROR: Faktory Worker does not support Rails version < 6.x")
     warn("**************************************************")
     warn("")
   end

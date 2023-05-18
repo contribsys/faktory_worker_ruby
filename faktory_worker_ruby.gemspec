@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.executables = ["faktory-worker"]
   gem.files = `git ls-files | grep -Ev '^(test|myapp|examples)'`.split("\n")
   gem.version = Faktory::VERSION
-  gem.required_ruby_version = ">= 2.5.0"
+  gem.required_ruby_version = ">= 2.7.0"
 
   gem.metadata = {
     "homepage_uri" => "https://contribsys.com/faktory",
@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   }
 
   gem.add_dependency "connection_pool", "~> 2.2", ">= 2.2.2"
-  gem.add_development_dependency "activejob", ">= 5.2.0"
+  gem.add_development_dependency "activejob", ">= 6.0.0"
   gem.add_development_dependency "minitest", "~> 5"
   gem.add_development_dependency "minitest-hooks"
   gem.add_development_dependency "rake"

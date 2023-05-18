@@ -347,9 +347,9 @@ module Faktory
       raise Errno::ECONNRESET, "No response" unless line
       chr = line[0]
       if chr == "+"
-        line[1..-1].strip
+        line[1..].strip
       elsif chr == "$"
-        count = line[1..-1].strip.to_i
+        count = line[1..].strip.to_i
         return nil if count == -1
         data = read(count) if count > 0
         _ = gets # read extra linefeeds
@@ -362,7 +362,7 @@ module Faktory
         #
         # -NOTUNIQUE Job not unique
         # We return ["NOTUNIQUE", "Job not unique"]
-        err = line[1..-1].split(" ", 2)
+        err = line[1..].split(" ", 2)
         raise CommandError, err[1] if err[0] == "ERR"
         err
       else
