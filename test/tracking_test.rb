@@ -18,10 +18,18 @@ class TrackingTest < Minitest::Test
     assert_equal String, @jid.class
     assert_equal 24, @jid.size
 
+    cl = Faktory::Client.new
+
     ent_only do
       track_progress(1)
-
       track_progress(2, "Starting...")
+
+      h = cl.get_track(@jid)
+      assert_equal 2, h["percent"]
+      assert_equal "Starting...", h["desc"]
+      assert_equal "enqueued", h["state"]
+      assert_equal @jid, h["jid"]
+      cl.close
 
       assert_raises ArgumentError do
         track_progress(10, "Working...", reserve_until: 10.minutes)
