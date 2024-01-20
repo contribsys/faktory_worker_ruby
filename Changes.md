@@ -1,6 +1,6 @@
 # Changes
 
-## HEAD
+## 2.0.0
 
 - Allow more connections in pool [#455]
 - Minimum Ruby version is now 2.7.

@@ -34,10 +34,10 @@ server part is [here](https://github.com/contribsys/faktory/)
 
 ## Requirements
 
-* Ruby 2.5 or higher
-* Faktory 1.2 or higher [Installation](https://github.com/contribsys/faktory/wiki/Installation)
+* Ruby 2.7 or higher
+* Faktory 1.8 or higher [Installation](https://github.com/contribsys/faktory/wiki/Installation)
 
-Optionally, Rails 5.2+ for ActiveJob.
+Optionally, Rails 6.0+ for ActiveJob.
 
 ## Installation
 
@@ -79,7 +79,7 @@ bundle exec faktory-worker
 
 Sidekiq is awesome; it's stable and useful. It suffers from two design limitations:
 
-1. Sidekiq uses Redis and Redis is dumb datastore, all Sidekiq features are
+1. Sidekiq uses Redis and Redis is a plain datastore, all Sidekiq features are
    implemented in Ruby and have to travel over the network to access data.
 2. Because of (1), Sidekiq is limited to Ruby.  You can't execute jobs
    with, e.g., Python and get the same Sidekiq features.
@@ -97,4 +97,4 @@ PRs to improve this are very welcome).
 
 ## Author
 
-Mike Perham, @getajobmike, mike @ contribsys.com
+Mike Perham, [@getajobmike](https://ruby.social/@getajobmike), mike @ contribsys.com
