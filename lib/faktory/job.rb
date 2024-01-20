@@ -173,7 +173,7 @@ module Faktory
             m = "#{name}="
             undef_method(m) if method_defined?(m) || private_method_defined?(m)
           end
-          define_singleton_method("#{name}=") do |val|
+          define_singleton_method(:"#{name}=") do |val|
             singleton_class.class_eval do
               undef_method(name) if method_defined?(name) || private_method_defined?(name)
               define_method(name) { val }

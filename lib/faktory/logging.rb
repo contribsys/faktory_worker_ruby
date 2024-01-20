@@ -62,7 +62,7 @@ module Faktory
     end
 
     def self.logger=(log)
-      @logger = (log || Logger.new(File::NULL))
+      @logger = log || Logger.new(File::NULL)
     end
 
     def logger
