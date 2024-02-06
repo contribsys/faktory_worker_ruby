@@ -240,7 +240,7 @@ module Faktory
     private
 
     def debug(line)
-      puts line
+      Faktory.logger.info(line)
     end
 
     def tls?
