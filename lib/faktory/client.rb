@@ -321,7 +321,7 @@ module Faktory
 
       begin
         yield
-      rescue SystemCallError, SocketError, TimeoutError
+      rescue SystemCallError, SocketError, TimeoutError, OpenSSL::SSL::SSLError
         if retryable
           retryable = false
 
