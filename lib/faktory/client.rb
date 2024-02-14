@@ -56,6 +56,12 @@ module Faktory
       @debug = debug
       @location = URI(url)
       @timeout = timeout
+      @errors = [SystemCallError, SocketError, TimeoutError]
+
+      if tls?
+        require "openssl"
+        @errors << OpenSSL::SSL::SSLError
+      end
 
       open_socket(@timeout)
     end
@@ -251,7 +257,6 @@ module Faktory
     # NB: aliased by faktory/testing
     def open_socket(timeout = DEFAULT_TIMEOUT)
       if tls?
-        require "openssl"
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
@@ -321,7 +326,7 @@ module Faktory
 
       begin
         yield
-      rescue SystemCallError, SocketError, TimeoutError, OpenSSL::SSL::SSLError
+      rescue *@errors
         if retryable
           retryable = false
 
