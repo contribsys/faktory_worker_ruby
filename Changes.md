@@ -1,5 +1,10 @@
 # Changes
 
+## 2.1.0
+
+- Improve support for TLS connections [#84]
+- Gracefully handle OpenSSL errors during transactions [#83]
+
 ## 2.0.0
 
 - Allow more connections in pool [#455]
