@@ -14,6 +14,8 @@ module I18n
   end
 end
 
+# ENV["FAKTORY_URL"] = "tcp+tls://test.contribsys.com:7419"
+
 require "minitest/hooks/test"
 class LiveTest < Minitest::Test
   include Minitest::Hooks

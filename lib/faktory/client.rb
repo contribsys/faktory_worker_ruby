@@ -261,11 +261,14 @@ module Faktory
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
         ctx = OpenSSL::SSL::SSLContext.new
-        ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
         ctx.min_version = OpenSSL::SSL::TLS1_2_VERSION
+        ENV["FAKTORY_DISABLE_HOSTNAME_VERIFICATION"] ?
+          ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_NONE) :
+          ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
 
         @sock = OpenSSL::SSL::SSLSocket.new(sock, ctx).tap do |socket|
           socket.sync_close = true
+          socket.hostname = @location.hostname
           socket.connect
         end
       else
@@ -307,6 +310,12 @@ module Faktory
 
       command("HELLO", Faktory.dump_json(payload))
       ok
+    rescue Errno::ECONNRESET
+      # A tcp client talking to a TLS server will get ECONNRESET
+      tls? ? raise : raise("Server using TLS? Use FAKTORY_URL=tcp+tls://... to enable encryption")
+    rescue OpenSSL::SSL::SSLError
+      # A TLS client talking to a TCP server will get OpenSSL::SSL::SSLError
+      tls? ? raise("Server not using TLS? Use FAKTORY_URL=tcp://... to disable encryption") : raise
     end
 
     def command(*args)
