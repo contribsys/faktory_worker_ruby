@@ -1,6 +1,8 @@
 require "helper"
 
 class ClientTest < Minitest::Test
+  Faktory::Client::DEFAULT_TIMEOUT = 1
+
   def teardown
     # Ensure that these tests aren't dependent on run order
     ENV["FAKTORY_PROVIDER"] = nil

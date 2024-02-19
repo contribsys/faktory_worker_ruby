@@ -4,7 +4,6 @@ require "uri"
 require "cgi"
 require "digest"
 require "securerandom"
-require "timeout"
 require "faktory/io"
 
 module Faktory
@@ -55,9 +54,8 @@ module Faktory
       super
       @debug = debug
       @location = URI(url)
-      @timeout = timeout
 
-      open_socket(@timeout)
+      open_socket
     end
 
     def close
@@ -249,9 +247,11 @@ module Faktory
     end
 
     # NB: aliased by faktory/testing
-    def open_socket(timeout = DEFAULT_TIMEOUT)
+    def open_socket
+      tlserrors = []
       if tls?
         require "openssl"
+        tlserrors << ::OpenSSL::SSL::SSLError
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
 
@@ -305,12 +305,20 @@ module Faktory
 
       command("HELLO", Faktory.dump_json(payload))
       ok
-    rescue Errno::ECONNRESET
+    rescue Errno::ECONNRESET, Faktory::TimeoutError
       # A tcp client talking to a TLS server will get ECONNRESET
-      tls? ? raise : raise("Server using TLS? Use FAKTORY_URL=tcp+tls://... to enable encryption")
-    rescue OpenSSL::SSL::SSLError
+      if tls?
+        raise
+      else
+        raise("Server using TLS? Use FAKTORY_URL=tcp+tls://... to enable encryption")
+      end
+    rescue *tlserrors
       # A TLS client talking to a TCP server will get OpenSSL::SSL::SSLError
-      tls? ? raise("Server not using TLS? Use FAKTORY_URL=tcp://... to disable encryption") : raise
+      if tls?
+        raise("Server not using TLS? Use FAKTORY_URL=tcp://... to disable encryption")
+      else
+        raise
+      end
     end
 
     def command(*args)
@@ -326,11 +334,11 @@ module Faktory
       # have an underlying socket.  Now if you disable testing and try to use that
       # client, it will crash without a socket.  This open() handles that case to
       # transparently open a socket.
-      open_socket(@timeout) if !@sock
+      open_socket if !@sock
 
       begin
         yield
-      rescue SystemCallError, SocketError, TimeoutError, OpenSSL::SSL::SSLError
+      rescue SystemCallError, SocketError, Faktory::TimeoutError, OpenSSL::SSL::SSLError
         if retryable
           retryable = false
 
@@ -340,7 +348,7 @@ module Faktory
             nil
           end
           @sock = nil
-          open_socket(@timeout)
+          open_socket
           retry
         else
           raise

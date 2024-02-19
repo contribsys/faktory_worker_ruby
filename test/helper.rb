@@ -15,22 +15,11 @@ module I18n
 end
 
 # ENV["FAKTORY_URL"] = "tcp+tls://test.contribsys.com:7419"
+ENV["FAKTORY_URL"] = "tcp://test.contribsys.com:7419"
 
 require "minitest/hooks/test"
 class LiveTest < Minitest::Test
   include Minitest::Hooks
-end
-
-def pro?
-  @desc ||= Faktory.server_pool.with do |c|
-    data = c.info
-    data["server"]["description"]
-  end
-  @desc.index("Pro") || @desc.index("Enterprise")
-end
-
-def pro_only
-  yield if pro?
 end
 
 def ent_only
