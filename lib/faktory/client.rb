@@ -54,6 +54,7 @@ module Faktory
       super
       @debug = debug
       @location = URI(url)
+      @sock = nil
 
       open_socket
     end
