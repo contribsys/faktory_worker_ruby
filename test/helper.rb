@@ -15,7 +15,7 @@ module I18n
 end
 
 # ENV["FAKTORY_URL"] = "tcp+tls://test.contribsys.com:7419"
-ENV["FAKTORY_URL"] = "tcp://test.contribsys.com:7419"
+ENV["FAKTORY_URL"] = "tcp://localhost:7419"
 
 require "minitest/hooks/test"
 class LiveTest < Minitest::Test
