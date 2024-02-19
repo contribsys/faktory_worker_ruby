@@ -13,9 +13,9 @@ class UniqueTest < Minitest::Test
     assert_equal String, rc.class
     assert_equal 24, rc.size
 
-    pro_only do
+    ent_only do
       # This test will fail if performed against Faktory.
-      # It's here to test Faktory Pro.
+      # It's here to test Faktory Ent.
       rc = LonelyJob.perform_async(1)
       assert_equal Symbol, rc.class
       assert_equal :NOTUNIQUE, rc

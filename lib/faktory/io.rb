@@ -1,4 +1,5 @@
 require "io/wait"
+require "timeout"
 
 # this is the necessary magic to get a line-oriented protocol to
 # respect a read timeout. unfortunately Ruby sockets do not provide any
