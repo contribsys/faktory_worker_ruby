@@ -51,4 +51,19 @@ class ClientTest < Minitest::Test
     assert client.pause_queues ["foo", "bar"]
     assert client.resume_queues "*"
   end
+
+  def test_queue_latency
+    client = Faktory::Client.new
+    assert_equal({"foo" => 0, "default" => 0}, client.queue_latency("default", "foo"))
+    client.push(jobtype: "mike", jid: "123456789", args: [])
+    hsh = client.queue_latency("default")
+    assert_in_delta 0.1, hsh["default"], 0.1
+
+    assert_raises ArgumentError do
+      client.queue_latency
+    end
+    assert_raises Faktory::CommandError do
+      client.queue_latency "*"
+    end
+  end
 end
