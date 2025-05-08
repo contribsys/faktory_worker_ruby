@@ -5,6 +5,7 @@ require "cgi"
 require "digest"
 require "securerandom"
 require "faktory/io"
+require "openssl"
 
 module Faktory
   class BaseError < StandardError; end
@@ -158,6 +159,15 @@ module Faktory
       end
     end
 
+    def queue_latency(*queues)
+      qs = Array(queues)
+      raise ArgumentError, "no queue given" if qs.empty?
+      transaction do
+        command "QUEUE LATENCY", qs.join(" ")
+        JSON.parse(result!)
+      end
+    end
+
     # Push a hash corresponding to a job payload to Faktory.
     # Hash must contain "jid", "jobtype" and "args" elements at minimum.
     # Returned value will either be the JID String if successful OR
@@ -251,7 +261,6 @@ module Faktory
     def open_socket
       tlserrors = []
       if tls?
-        require "openssl"
         tlserrors << ::OpenSSL::SSL::SSLError
         sock = TCPSocket.new(@location.hostname, @location.port)
         sock.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)

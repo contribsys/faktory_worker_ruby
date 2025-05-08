@@ -1,5 +1,11 @@
 # Changes
 
+## 2.1.1
+
+- Add new `Faktory::Client#queue_latency` API
+- Require OpenSSL for client
+- Bump requirements for Ruby, Rails
+
 ## 2.1.0
 
 - Require ActiveJob 7.0+, connection_pool 2.5+
