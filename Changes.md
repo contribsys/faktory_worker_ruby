@@ -1,5 +1,9 @@
 # Changes
 
+## 2.1.2
+
+- Fix race condition in `faktory_options`. [#523]
+
 ## 2.1.1
 
 - Add new `Faktory::Client#queue_latency` API
