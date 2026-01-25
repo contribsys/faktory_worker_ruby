@@ -7,12 +7,14 @@ class BatchTest < Minitest::Test
 
   class BatchJob
     include Faktory::Job
+
     def perform(*)
     end
   end
 
   class CustomBatchJob
     include Faktory::Job
+
     faktory_options custom: {track: 1}
     def perform(*)
     end
@@ -20,12 +22,14 @@ class BatchTest < Minitest::Test
 
   class FooJob
     include Faktory::Job
+
     def perform(*)
     end
   end
 
   class BarJob
     include Faktory::Job
+
     def perform(*)
     end
   end

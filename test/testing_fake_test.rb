@@ -6,6 +6,7 @@ class TestingFakeTest < LiveTest
 
     class DirectJob
       include Faktory::Job
+
       def perform(a, b)
         a + b
       end
@@ -13,6 +14,7 @@ class TestingFakeTest < LiveTest
 
     class EnqueuedJob
       include Faktory::Job
+
       def perform(a, b)
         a + b
       end
@@ -20,6 +22,7 @@ class TestingFakeTest < LiveTest
 
     class StoredJob
       include Faktory::Job
+
       def perform(error)
         raise PerformError if error
       end
@@ -74,6 +77,7 @@ class TestingFakeTest < LiveTest
 
     class SpecificJidJob
       include Faktory::Job
+
       faktory_class_attribute :count
       self.count = 0
       def perform(worker_jid)
@@ -129,6 +133,7 @@ class TestingFakeTest < LiveTest
 
     class FirstJob
       include Faktory::Job
+
       faktory_class_attribute :count
       self.count = 0
       def perform
@@ -138,6 +143,7 @@ class TestingFakeTest < LiveTest
 
     class SecondJob
       include Faktory::Job
+
       faktory_class_attribute :count
       self.count = 0
       def perform
@@ -147,6 +153,7 @@ class TestingFakeTest < LiveTest
 
     class ThirdJob
       include Faktory::Job
+
       faktory_class_attribute :count
       def perform
         FirstJob.perform_async
@@ -227,6 +234,7 @@ class TestingFakeTest < LiveTest
 
     class AltQueueJob
       include Faktory::Job
+
       faktory_options queue: :alt
       def perform(a, b)
         a + b
@@ -261,6 +269,7 @@ class TestingFakeTest < LiveTest
 
     class QueueJob
       include Faktory::Job
+
       def perform(a, b)
         a + b
       end

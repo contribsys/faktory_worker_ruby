@@ -8,6 +8,7 @@ class TestingInlineTest < LiveTest
 
     class InlineJob
       include Faktory::Job
+
       def perform(pass)
         raise InlineError unless pass
       end
@@ -15,6 +16,7 @@ class TestingInlineTest < LiveTest
 
     class InlineJobWithTimeParam
       include Faktory::Job
+
       def perform(time)
         raise ParameterIsNotString unless time.is_a?(String) || time.is_a?(Numeric)
       end

@@ -3,6 +3,7 @@ require "helper"
 class MergeTest < LiveTest
   class SomeJob
     include Faktory::Job
+
     faktory_options queue: :some_q, retry: 1, reserve_for: 2, custom: {unique_for: 3}
     def perform(*)
     end

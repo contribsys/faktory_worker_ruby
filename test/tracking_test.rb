@@ -3,6 +3,7 @@ require "helper"
 class TrackingTest < Minitest::Test
   class TrackedJob
     include Faktory::Job
+
     faktory_options custom: {track: 1}
     def perform(*)
     end

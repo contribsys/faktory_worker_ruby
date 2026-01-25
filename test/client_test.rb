@@ -54,6 +54,8 @@ class ClientTest < Minitest::Test
 
   def test_queue_latency
     client = Faktory::Client.new
+    client.flush
+
     assert_equal({"foo" => 0, "default" => 0}, client.queue_latency("default", "foo"))
     client.push(jobtype: "mike", jid: "123456789", args: [])
     hsh = client.queue_latency("default")

@@ -48,6 +48,7 @@ class SystemTest < LiveTest
 
   class TestJob
     include Faktory::Job
+
     faktory_options retry: 3, backtrace: 10, blargh: "foo", queue: "custom"
 
     def perform(count, name)

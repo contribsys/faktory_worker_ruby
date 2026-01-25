@@ -3,6 +3,7 @@ require "helper"
 class UniqueTest < Minitest::Test
   class LonelyJob
     include Faktory::Job
+
     faktory_options custom: {unique_for: 10}
     def perform(*)
     end

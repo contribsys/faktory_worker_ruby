@@ -61,6 +61,7 @@ end
 
 class A
   include Faktory::Job
+
   def perform(arg = nil)
     logger.info { "#{self.class.name} running: #{arg.inspect}" }
   end
@@ -115,6 +116,7 @@ end
 
 class NoOp
   include Faktory::Job
+
   def perform
   end
 end

@@ -4,6 +4,7 @@ require "faktory/mutate"
 class MutateTest < LiveTest
   class MutateJob
     include Faktory::Job
+
     def perform(arg)
     end
   end

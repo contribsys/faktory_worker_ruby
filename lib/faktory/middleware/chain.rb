@@ -67,6 +67,7 @@ module Faktory
   module Middleware
     class Chain
       include Enumerable
+
       attr_reader :entries
 
       def initialize_copy(copy)

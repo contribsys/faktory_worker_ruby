@@ -4,6 +4,7 @@ require "faktory/processor"
 class TestProcessor < Minitest::Test
   class SomeJob
     include Faktory::Job
+
     def perform
     end
   end
