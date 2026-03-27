@@ -17,9 +17,8 @@ end
 # ENV["FAKTORY_URL"] = "tcp+tls://test.contribsys.com:7419"
 ENV["FAKTORY_URL"] = "tcp://localhost:7419"
 
-require "minitest/hooks/test"
+# TODO remove
 class LiveTest < Minitest::Test
-  include Minitest::Hooks
 end
 
 def ent_only
