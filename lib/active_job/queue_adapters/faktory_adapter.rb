@@ -40,6 +40,10 @@ module ActiveJob
         end
       end
 
+      def enqueue_after_transaction_commit?(job) # :nodoc:
+        true
+      end
+
       class JobWrapper # :nodoc:
         include Faktory::Job
 
