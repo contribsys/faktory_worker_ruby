@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
     "source_code_uri" => "https://github.com/contribsys/faktory_worker_ruby"
   }
 
-  gem.add_dependency "connection_pool", "~> 2.5"
+  gem.add_dependency "connection_pool", "<4"
   gem.add_development_dependency "activejob", ">= 7.0.0"
   gem.add_development_dependency "minitest"
   gem.add_development_dependency "rake"
