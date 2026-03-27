@@ -1,5 +1,10 @@
 # Changes
 
+## 2.2.0
+
+- Add support for Active Job's transaction and iteration adapter hooks [#92]
+- Forward compatibility with connection_pool 3.x
+
 ## 2.1.2
 
 - Fix race condition in `faktory_options`. [#523]

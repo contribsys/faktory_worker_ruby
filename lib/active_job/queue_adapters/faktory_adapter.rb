@@ -10,6 +10,17 @@ module ActiveJob
     #
     #   Rails.application.config.active_job.queue_adapter = :faktory
     class FaktoryAdapter
+      @@stopping = false
+      Faktory.configure_worker { |config| config.on(:quiet) { @@stopping = true } }
+
+      def stopping?
+        @@stopping
+      end
+
+      def enqueue_after_transaction_commit?(job) # :nodoc:
+        true
+      end
+
       def enqueue(job) # :nodoc:
         enqueue_at(job, nil)
       end
