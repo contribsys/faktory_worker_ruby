@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
     "homepage_uri" => "https://contribsys.com/faktory",
     "bug_tracker_uri" => "https://github.com/contribsys/faktory_worker_ruby/issues",
     "documentation_uri" => "https://github.com/contribsys/faktory_worker_ruby/wiki",
-    "changelog_uri" => "https://github.com/contribsys/faktory_worker_ruby/blob/master/Changes.md",
+    "changelog_uri" => "https://github.com/contribsys/faktory_worker_ruby/blob/main/Changes.md",
     "source_code_uri" => "https://github.com/contribsys/faktory_worker_ruby"
   }
 
