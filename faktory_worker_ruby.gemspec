@@ -23,6 +23,8 @@ Gem::Specification.new do |gem|
   }
 
   gem.add_dependency "connection_pool", "<4"
+  gem.add_dependency "logger"
+  gem.add_dependency "json"
   gem.add_development_dependency "activejob", ">= 7.0.0"
   gem.add_development_dependency "minitest"
   gem.add_development_dependency "rake"

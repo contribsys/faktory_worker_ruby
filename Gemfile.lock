@@ -3,6 +3,8 @@ PATH
   specs:
     faktory_worker_ruby (2.2.0)
       connection_pool (< 4)
+      json
+      logger
 
 GEM
   remote: https://rubygems.org/
@@ -105,6 +107,3 @@ DEPENDENCIES
   rake
   simplecov
   standard
-
-BUNDLED WITH
-  4.0.4
